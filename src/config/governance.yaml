@@ -1,0 +1,173 @@
+# BuildToValue v7.3 - Global Governance Policy (Camada 1 - Lei)
+# ISO 42001 + EU AI Act Compliant
+
+version: "7.3.0"
+last_updated: "2024-12-24"
+
+# === EU AI ACT ART. 5 - PRÁTICAS PROIBIDAS (NÃO NEGOCIÁVEL) ===
+prohibited_practices:
+  - social_scoring              # Art. 5(1)(c) - Social scoring por autoridades
+  - subliminal_manipulation     # Art. 5(1)(a) - Manipulação subliminar
+  - vulnerability_exploitation  # Art. 5(1)(b) - Exploração de vulnerabilidades
+  - emotion_recognition_workplace  # Art. 5(1)(f) - Reconhecimento de emoções no trabalho
+  - biometric_categorization    # Art. 5(1)(d) - Categorização biométrica sensível
+  - predictive_policing_individuals  # Art. 5(1)(g) - Policiamento preditivo individual
+  - real_time_biometric_public  # Art. 5(1)(h) - Identificação biométrica em tempo real
+
+# === MATRIZ DE AUTONOMIA POR AMBIENTE (ISO 42001 6.1.2) ===
+autonomy_matrix:
+  # Desenvolvimento - Alta experimentação permitida
+  development:
+    max_risk_level: 8.0
+    require_human_oversight: false
+    allow_sandbox: true
+    description: "Ambiente de desenvolvimento com liberdade para experimentação"
+    audit_level: "basic"
+
+  # Staging - Testes controlados
+  staging:
+    max_risk_level: 5.0
+    require_human_oversight: false
+    allow_sandbox: true
+    description: "Ambiente de testes pré-produção com controles moderados"
+    audit_level: "enhanced"
+
+  # Produção - Apenas sistemas aprovados e auditados
+  production:
+    max_risk_level: 3.0
+    require_human_oversight: true
+    allow_sandbox: false
+    description: "Ambiente de produção com controles rigorosos"
+    audit_level: "full"
+
+# === REQUISITOS DE DOCUMENTAÇÃO (ART. 11 + ISO 42001 8.2) ===
+documentation_requirements:
+  high_risk_systems:
+    - fundamental_impact_assessment    # Art. 27 EU AI Act
+    - technical_documentation          # Art. 11 EU AI Act
+    - conformity_assessment            # Art. 43 EU AI Act
+    - eu_database_registration         # Art. 71 EU AI Act
+    - data_governance_measures         # ISO 42001 A.7.2
+    - risk_management_system           # ISO 42001 6.1.2
+
+  limited_risk_systems:
+    - basic_documentation
+    - transparency_obligations         # Art. 50 EU AI Act
+
+  minimal_risk_systems:
+    - voluntary_code_of_conduct        # Art. 69 EU AI Act
+
+# === THRESHOLDS DE FLOPS (ART. 51 - GPAI SYSTEMIC RISK) ===
+gpai_thresholds:
+  systemic_risk_flops: 1.0e25  # 10^25 FLOPs
+  high_compute_flops: 1.0e24   # 10^24 FLOPs (warning threshold)
+
+# === POLÍTICAS DE LOGGING (ISO 42001 A.7.5 + EU AI ACT ART. 12) ===
+logging:
+  retention_days: 1825  # 5 anos (compliance requirement)
+  tamper_proof: true
+  signature_algorithm: "HMAC-SHA256"
+  include_fields:
+    - timestamp
+    - system_id
+    - task_description
+    - risk_score
+    - decision
+    - policy_hash
+    - user_id
+
+  # Dados sensíveis que NÃO devem ser logados (GDPR Art. 5)
+  exclude_fields:
+    - personal_identifiable_information
+    - biometric_data
+    - health_data
+    - financial_credentials
+
+# === NOTIFICAÇÕES DE INCIDENTES GRAVES (ART. 62) ===
+notifications:
+  serious_incident_threshold: 9.0
+  notify_authorities: true
+  authorities_contact: "incident@eu-ai-board.europa.eu"
+  notification_deadline_hours: 24
+
+  incident_categories:
+    - unauthorized_access
+    - data_breach
+    - algorithmic_bias_detected
+    - safety_critical_failure
+    - prohibited_practice_violation
+
+# === CONTROLES DE SEGURANÇA (ISO 42001 ANNEX B) ===
+security_controls:
+  authentication:
+    jwt_expiration_minutes: 30
+    require_mfa_for_high_risk: true
+    password_min_length: 12
+
+  authorization:
+    rbac_enabled: true
+    roles:
+      - admin      # Full access
+      - dev        # System registration, enforcement
+      - auditor    # Read-only audit access
+      - app        # Runtime enforcement only
+
+  data_protection:
+    encryption_at_rest: true
+    encryption_in_transit: true
+    encryption_algorithm: "AES-256-GCM"
+
+  audit:
+    ledger_signed: true
+    signature_algorithm: "HMAC-SHA256"
+    immutable: true
+
+# === POLÍTICAS DE DADOS (ISO 42001 A.7) ===
+data_governance:
+  data_quality_requirements:
+    completeness: 0.95
+    accuracy: 0.98
+    timeliness: true
+
+  data_lineage:
+    track_provenance: true
+    track_transformations: true
+    track_access: true
+
+  data_retention:
+    training_data: 2555  # 7 years
+    inference_logs: 1825  # 5 years
+    audit_logs: 3650      # 10 years
+
+# === JURISDIÇÕES SUPORTADAS ===
+supported_jurisdictions:
+  - EU     # European Union (default)
+  - US     # United States
+  - UK     # United Kingdom
+  - BR     # Brazil (LGPD)
+  - CA     # Canada
+  - JP     # Japan
+  - AU     # Australia
+
+# === CUSTOM RULES (EXTENSÍVEL POR TENANTS) ===
+custom_rules:
+  # Exemplo: Tenants podem adicionar regras adicionais
+  # desde que não violem prohibited_practices
+  allow_anonymous_inference: false
+  block_cross_border_data_transfer: false
+  require_explainability: true
+
+# === COMPLIANCE CERTIFICATIONS TARGET ===
+certifications:
+  - iso_42001_2023
+  - iso_27001_2022
+  - eu_ai_act_2024
+  - soc_2_type_ii
+  - gdpr
+
+# === METADATA ===
+metadata:
+  maintained_by: "BuildToValue Compliance Team"
+  review_frequency_days: 90
+  last_audit: "2024-12-24"
+  next_review: "2025-03-24"

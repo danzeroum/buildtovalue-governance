@@ -1,0 +1,35 @@
+{
+  "tenant": {
+    "id": "health-tenant-660e9500-f39c-52e5-b827-557766551111",
+    "name": "Hospital Central",
+    "policy": {
+      "autonomy_matrix": {
+        "production": {
+          "max_risk_level": 2.5,
+          "require_human_oversight": true
+        }
+      },
+      "custom_rules": {
+        "require_medical_oversight": true,
+        "block_biometric_without_consent": true,
+        "anonymize_patient_data": true
+      }
+    }
+  },
+  "systems": [
+    {
+      "id": "diagnostic-assistant-v3",
+      "name": "Medical Diagnostic Assistant",
+      "version": "3.0.0",
+      "sector": "healthcare",
+      "role": "deployer",
+      "risk": "high",
+      "sandbox": false,
+      "eu_database_id": "EU-DB-HEALTH-11111",
+      "training_flops": 2e24,
+      "logging_enabled": true,
+      "jurisdiction": "EU",
+      "high_risk_flags": ["medical_diagnosis"]
+    }
+  ]
+}

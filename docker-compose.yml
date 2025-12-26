@@ -1,0 +1,71 @@
+# BuildToValue v7.3 - Docker Compose (Development)
+# Usage: docker-compose up -d
+
+version: '3.8'
+
+services:
+  btv-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ENVIRONMENT: development
+    container_name: btv-api
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+      - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
+      - HMAC_KEY=${HMAC_KEY:-change-me-in-production}
+      - DB_URL=postgresql://btv:btv123@btv-db:5432/btv_governance
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./src:/app/src
+      - ./data:/app/data
+      - ./logs:/app/logs
+    depends_on:
+      btv-db:
+        condition: service_healthy
+    networks:
+      - btv-network
+    restart: unless-stopped
+    command: ["uvicorn", "src.interface.api.gateway:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+  btv-db:
+    image: postgres:15-alpine
+    container_name: btv-db
+    environment:
+      - POSTGRES_USER=btv
+      - POSTGRES_PASSWORD=btv123
+      - POSTGRES_DB=btv_governance
+    volumes:
+      - btv-db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - btv-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U btv"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  btv-docs:
+    image: nginx:alpine
+    container_name: btv-docs
+    ports:
+      - "8080:80"
+    volumes:
+      - ./docs:/usr/share/nginx/html:ro
+    networks:
+      - btv-network
+    restart: unless-stopped
+
+volumes:
+  btv-db-data:
+    driver: local
+
+networks:
+  btv-network:
+    driver: bridge

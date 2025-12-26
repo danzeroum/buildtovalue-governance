@@ -1,0 +1,62 @@
+{
+  "tenant": {
+    "id": "bank-tenant-550e8400-e29b-41d4-a716-446655440000",
+    "name": "Banco Seguro S.A.",
+    "policy": {
+      "autonomy_matrix": {
+        "development": {
+          "max_risk_level": 6.0,
+          "require_human_oversight": false
+        },
+        "staging": {
+          "max_risk_level": 4.0,
+          "require_human_oversight": false
+        },
+        "production": {
+          "max_risk_level": 2.0,
+          "require_human_oversight": true
+        }
+      },
+      "custom_rules": {
+        "block_public_apis_in_prod": true,
+        "require_explainability": true,
+        "max_data_retention_days": 2555
+      }
+    }
+  },
+  "systems": [
+    {
+      "id": "credit-scoring-v2",
+      "name": "Credit Risk Scoring AI",
+      "version": "2.1.0",
+      "sector": "banking",
+      "role": "deployer",
+      "risk": "high",
+      "sandbox": false,
+      "policy": {
+        "autonomy_matrix": {
+          "production": {
+            "max_risk_level": 1.5
+          }
+        }
+      },
+      "eu_database_id": "EU-DB-BANK-12345",
+      "training_flops": 1e24,
+      "logging_enabled": true,
+      "jurisdiction": "EU"
+    },
+    {
+      "id": "fraud-detection-v1",
+      "name": "Real-Time Fraud Detection",
+      "version": "1.0.0",
+      "sector": "banking",
+      "role": "provider",
+      "risk": "high",
+      "sandbox": false,
+      "eu_database_id": "EU-DB-BANK-67890",
+      "training_flops": 5e23,
+      "logging_enabled": true,
+      "jurisdiction": "EU"
+    }
+  ]
+}

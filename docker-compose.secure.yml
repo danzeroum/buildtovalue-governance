@@ -1,0 +1,107 @@
+# BuildToValue v7.3 - Secure Production Deployment
+# Usage: docker-compose -f docker-compose.secure.yml up -d
+
+version: '3.8'
+
+services:
+  btv-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ENVIRONMENT: production
+    container_name: btv-api-prod
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - LOG_LEVEL=WARNING
+    secrets:
+      - jwt_secret
+      - hmac_key
+      - db_password
+    volumes:
+      - btv-data:/app/data:rw
+      - btv-logs:/app/logs:rw
+    depends_on:
+      btv-db:
+        condition: service_healthy
+    networks:
+      - btv-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  btv-db:
+    image: postgres:15-alpine
+    container_name: btv-db-prod
+    environment:
+      - POSTGRES_USER=btv
+      - POSTGRES_DB=btv_governance
+    secrets:
+      - source: db_password
+        target: /run/secrets/postgres_password
+    environment:
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password
+    volumes:
+      - btv-db-data:/var/lib/postgresql/data
+    networks:
+      - btv-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U btv"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+
+  btv-nginx:
+    image: nginx:alpine
+    container_name: btv-nginx
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - btv-logs:/var/log/nginx
+    depends_on:
+      - btv-api
+    networks:
+      - btv-network
+    restart: always
+
+secrets:
+  jwt_secret:
+    file: ./secrets/jwt_secret.txt
+  hmac_key:
+    file: ./secrets/hmac_key.txt
+  db_password:
+    file: ./secrets/db_password.txt
+
+volumes:
+  btv-data:
+    driver: local
+  btv-db-data:
+    driver: local
+  btv-logs:
+    driver: local
+
+networks:
+  btv-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
