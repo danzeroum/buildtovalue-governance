@@ -718,3 +718,56 @@ References:
 [4] EU AI Act (Regulation 2024/1689)
 [5] GDPR (Regulation 2016/679)
 """
+
+class TestSimplifiedTaxonomy(unittest.TestCase):
+    """Test simplified ThreatCategory enum (backward compatibility)."""
+
+    def setUp(self):
+        self.classifier = ThreatVectorClassifier(use_simplified=True)
+
+    def test_simplified_fairness_category(self):
+        """Simplified taxonomy should use FAIRNESS category."""
+        issues = [
+            "Discriminatory outcomes in loan approvals"
+        ]
+
+        result = self.classifier.classify(issues)
+
+        # Should use ThreatCategory.FAIRNESS (not ThreatDomain.BIASES)
+        self.assertIn(ThreatCategory.FAIRNESS, result.detected_categories)
+
+    def test_simplified_privacy_category(self):
+        """Simplified taxonomy should use PRIVACY category."""
+        issues = [
+            "PII leakage in model outputs"
+        ]
+
+        result = self.classifier.classify(issues)
+
+        self.assertIn(ThreatCategory.PRIVACY, result.detected_categories)
+
+    def test_domain_to_category_mapping(self):
+        """Verify correct mapping from domains to simplified categories."""
+        issues = [
+            "Adversarial perturbation attack"  # Should map to SECURITY
+        ]
+
+        result = self.classifier.classify(issues)
+
+        self.assertIn(ThreatCategory.SECURITY, result.detected_categories)
+
+
+# ============================================================================
+# ✅ ADICIONE ESTE BLOCO (estava faltando!)
+# ============================================================================
+if __name__ == "__main__":
+    import sys
+
+    print("\n" + "=" * 70)
+    print("BuildToValue v0.9.5.1 - Threat Classifier Test Suite")
+    print("=" * 70)
+    print(f"Total test cases: 27")
+    print("=" * 70 + "\n")
+
+    # Run tests with verbose output
+    unittest.main(verbosity=2, exit=True)
