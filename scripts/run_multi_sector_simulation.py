@@ -57,7 +57,7 @@ AVAILABLE_SECTORS = {
 
 def print_banner():
     print("\n" + "=" * 80)
-    print("  🛡️  BuildToValue Framework v7.3")
+    print("  🛡️  BuildToValue Framework v0.9")
     print("  Multi-Sector Compliance Simulation Suite")
     print("  EU AI Act High-Risk Scenarios Validation")
     print("=" * 80)
@@ -141,7 +141,7 @@ def generate_comparative_report(all_results, output_path):
     report = {
         "metadata": {
             "timestamp": datetime.now().isoformat(),
-            "framework_version": "7.3.0",
+            "framework_version": "0.9.0",
             "sectors_tested": len(all_results)
         },
         "aggregates": {

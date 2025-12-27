@@ -1,6 +1,6 @@
 # Multi-Tenant Security Design
 
-**BuildToValue Framework v7.3**  
+**BuildToValue Framework v0.9**  
 **Security Level:** Enterprise-Grade  
 **Threat Model:** OWASP API Security Top 10 2023
 

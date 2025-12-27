@@ -18,7 +18,7 @@ from src.domain.enums import AIRole, AISector, EUComplianceRisk, ArtifactType
 def temp_config():
     """Cria configuração temporária para testes"""
     config_data = {
-        "version": "7.3.0-test",
+        "version": "0.9.0-test",
         "prohibited_practices": ["social_scoring"],
         "autonomy_matrix": {
             "development": {"max_risk_level": 8.0},

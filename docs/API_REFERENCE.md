@@ -1,6 +1,6 @@
 # API Reference
 
-**BuildToValue Framework v7.3**  
+**BuildToValue Framework v0.9**  
 **Base URL:** `https://api.buildtovalue.ai` (production)  
 **Base URL (Local):** `http://localhost:8000`
 
@@ -38,7 +38,7 @@ Verifica status do serviço (sem autenticação).
 **Response 200:**
 {
 "status": "healthy",
-"version": "7.3.0",
+"version": "0.9.0",
 "security": "hardened"
 }
 
@@ -432,4 +432,4 @@ text
 
 **Document Version:** 1.0  
 **Last Updated:** 2024-12-24  
-**API Stability:** Stable (v7.3+)
+**API Stability:** Stable (v0.9+)

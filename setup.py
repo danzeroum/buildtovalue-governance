@@ -5,9 +5,9 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="buildtovalue",
-    version="7.3.0",
+    version="0.9.0",
     author="BuildToValue Contributors",
-    author_email="dev@buildtovalue.ai",
+    author_email="dev@buildtovalue.com",
     description="Enterprise AI Governance Framework with ISO 42001 Compliance",
     long_description=long_description,
     long_description_content_type="text/markdown",

@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-**BuildToValue Framework v7.3**  
+**BuildToValue Framework v0.9**  
 **Time to Production:** 15 minutes
 
 ---
@@ -23,7 +23,7 @@ docs/guides/QUICK_START.md
 text
 # Quick Start Guide
 
-**BuildToValue Framework v7.3**  
+**BuildToValue Framework v0.9**  
 **Time to Production:** 15 minutes
 
 ---
@@ -79,7 +79,7 @@ text
 **Response:**
 {
 "status": "healthy",
-"version": "7.3.0",
+"version": "0.9.0",
 "security": "hardened"
 }
 
@@ -355,7 +355,7 @@ text
 - **Issues:** https://github.com/buildtovalue/btv-framework/issues
 - **Discussions:** https://github.com/buildtovalue/btv-framework/discussions
 - **Discord:** https://discord.gg/buildtovalue
-- **Email:** support@buildtovalue.ai
+- **Email:** support@buildtovalue.com
 
 ---
 

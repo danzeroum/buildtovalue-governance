@@ -1,12 +1,12 @@
-# BuildToValue v7.3 - Production Dockerfile
+# BuildToValue v0.9 - Production Dockerfile
 # Multi-stage build for security and size optimization
 
 # === STAGE 1: Builder ===
 FROM python:3.11-slim AS builder
 
 # Metadata
-LABEL maintainer="BuildToValue Team <dev@buildtovalue.ai>"
-LABEL version="7.3.0"
+LABEL maintainer="BuildToValue Team <dev@buildtovalue.com>"
+LABEL version="0.9.0"
 LABEL description="Enterprise AI Governance Framework - ISO 42001 Compliant"
 
 # Build arguments

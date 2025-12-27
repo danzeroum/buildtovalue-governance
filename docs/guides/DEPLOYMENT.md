@@ -1,6 +1,6 @@
 # Production Deployment Guide
 
-**BuildToValue Framework v7.3**  
+**BuildToValue Framework v0.9**  
 **Target:** Production-ready deployment on AWS/GCP/Azure
 
 ---
@@ -201,7 +201,7 @@ app: btv-api
 spec:
 containers:
 - name: api
-image: buildtovalue/btv-framework:7.3.0
+image: buildtovalue/btv-framework:0.9.0
 env:
 - name: ENVIRONMENT
 value: production
@@ -301,10 +301,10 @@ docker login --username AWS --password-stdin
 123456789012.dkr.ecr.us-east-1.amazonaws.com
 
 Build and push
-docker build -t btv-framework:7.3.0 .
-docker tag btv-framework:7.3.0
-123456789012.dkr.ecr.us-east-1.amazonaws.com/btv-framework:7.3.0
-docker push 123456789012.dkr.ecr.us-east-1.amazonaws.com/btv-framework:7.3.0
+docker build -t btv-framework:0.9.0 .
+docker tag btv-framework:0.9.0
+123456789012.dkr.ecr.us-east-1.amazonaws.com/btv-framework:0.9.0
+docker push 123456789012.dkr.ecr.us-east-1.amazonaws.com/btv-framework:0.9.0
 
 text
 
@@ -319,7 +319,7 @@ text
 "containerDefinitions": [
 {
 "name": "btv-api",
-"image": "123456789012.dkr.ecr.us-east-1.amazonaws.com/btv-framework:7.3.0",
+"image": "123456789012.dkr.ecr.us-east-1.amazonaws.com/btv-framework:0.9.0",
 "portMappings": [
 {
 "containerPort": 8000,
@@ -565,7 +565,7 @@ text
 
 ## Support
 
-**Enterprise Support:** enterprise@buildtovalue.ai  
+**Enterprise Support:** enterprise@buildtovalue.com  
 **Managed Deployment:** Available for customers with >10M requests/month
 
 ---

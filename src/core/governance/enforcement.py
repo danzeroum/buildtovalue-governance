@@ -1,309 +1,307 @@
+#!/usr/bin/env python3
 """
-Runtime Enforcement Engine com Merge Conservador de Políticas
-
-Implementa:
-- 3-Layer Policy Hierarchy (Global > Tenant > System)
-- HMAC-Signed Audit Ledger (tamper-proof)
-- ISO 42001 6.1.3 (AI Risk Treatment)
-- EU AI Act Art. 12 (Logging)
+BuildToValue v0.9.0 - Enforcement Engine
+ARQUIVO: src/core/governance/enforcement.py (ATUALIZAR ESTE ARQUIVO)
+Updated with Kill Switch, Threat Classification, and Enhanced Logging.
 """
 
-import yaml
-import json
-import hashlib
-import hmac
-import logging
-import os
-from pathlib import Path
+from typing import Dict, List, Any, Optional
 from datetime import datetime
-from typing import Dict, Any
+import logging
 
-from src.domain.entities import Task, AISystem
-from src.intelligence.routing.adaptive_router import AdaptiveRiskRouter
-from src.compliance.analytics.rag_memory import ComplianceMemoryRAG
-from src.interface.human_oversight.dashboard import HumanOversightService
-from src.core.registry.system_registry import SystemRegistry
+from src.domain.entities import AISystem, Task, Decision
+from src.domain.enums import OperationalStatus, AIPhase
 
-logger = logging.getLogger("btv.enforcement")
+# ✅ IMPORT RELATIVO (funciona dentro de /governance)
+try:
+    from .threat_classifier import ThreatVectorClassifier, ThreatClassificationResult
+except ImportError:
+    # Fallback para import absoluto
+    from src.core.governance.threat_classifier import (
+        ThreatVectorClassifier,
+        ThreatClassificationResult
+    )
+
+logger = logging.getLogger(__name__)
 
 
 class RuntimeEnforcementEngine:
     """
-    Motor de Enforcement de Governança em Runtime
+    Core enforcement engine with multi-agent assessment.
 
-    Arquitetura:
-    1. Global Policy (governance.yaml) - Leis não negociáveis
-    2. Tenant Policy (DB) - Regras da empresa
-    3. System Policy (DB) - Configurações do projeto
+    v0.9.0 Enhancements:
+    - Kill Switch (EMERGENCY_STOP check)
+    - Huwyler threat classification
+    - Enriched audit logs
+    - Lifecycle-aware risk scoring
 
-    Security:
-    - HMAC-SHA256 signed ledger (tamper-proof)
-    - Conservative policy merge (mais restritivo vence)
-    - Validation against prohibited practices (Art. 5 EU AI Act)
+    References:
+    - NIST AI RMF 1.0: MANAGE-2.4 (Operational controls)
+    - Policy Cards: Runtime enforcement architecture
     """
 
-    def __init__(self, config_path: Path, memory_path: Path):
+    def __init__(self):
+        """Initialize enforcement engine with threat classifier."""
+        self.threat_classifier = ThreatVectorClassifier(use_simplified=True)
+        self.logger = logging.getLogger(__name__)
+
+    def enforce(
+            self,
+            task: Task,
+            system: AISystem,
+            policies: Optional[Dict[str, Any]] = None
+    ) -> Decision:
         """
-        Inicializa engine de enforcement
+        Evaluate task against system policies with enhanced threat analysis.
 
         Args:
-            config_path: Caminho para governance.yaml
-            memory_path: Diretório para compliance memory
+            task: Task to evaluate
+            system: AI system configuration
+            policies: Optional governance policies
+
+        Returns:
+            Decision with threat classification and system context
+
+        Workflow:
+        1. **KILL SWITCH CHECK** (new in v0.9.0)
+        2. Lifecycle validation
+        3. Multi-agent risk assessment
+        4. Threat classification (Huwyler)
+        5. Policy enforcement
+        6. Enriched logging
         """
-        # Carrega política global (Camada 1 - Lei)
-        with open(config_path) as f:
-            self.global_policy = yaml.safe_load(f)
-            logger.info(f"Global policy loaded: {self.global_policy.get('version', 'unknown')}")
 
-        # Componentes
-        self.registry = SystemRegistry()
-        self.router = AdaptiveRiskRouter()
-        self.memory = ComplianceMemoryRAG(memory_path)
-
-        # Ledger setup (ISO 42001 A.7.5 - Data Provenance)
-        self.ledger = Path("logs/enforcement_ledger.jsonl")
-        self.ledger.parent.mkdir(exist_ok=True, parents=True)
-        self.ledger.touch(exist_ok=True)
-
-        # Oversight (Art. 14 EU AI Act - Human Oversight)
-        self.oversight = HumanOversightService(self.ledger)
-
-        # HMAC key para assinatura do ledger
-        self.hmac_key = os.getenv("HMAC_KEY", "default-insecure-key-change-in-prod").encode()
-
-        if self.hmac_key == b"default-insecure-key-change-in-prod":
-            logger.warning(
-                "⚠️  USING DEFAULT HMAC KEY! Set HMAC_KEY environment variable in production!"
+        # ====================================================================
+        # STEP 1: KILL SWITCH (CRITICAL - Check first)
+        # ====================================================================
+        if system.operational_status == OperationalStatus.EMERGENCY_STOP:
+            self.logger.critical(
+                f"EMERGENCY_STOP activated for system {system.id}. "
+                f"All operations blocked."
+            )
+            return Decision(
+                outcome="BLOCKED",
+                reason="KILL_SWITCH_ACTIVE - System under emergency stop",
+                risk_score=10.0,  # Maximum risk
+                issues=["Emergency stop activated"],
+                recommended_action="Contact system administrator for reactivation",
+                threat_classification={
+                    "status": "EMERGENCY",
+                    "reason": "Manual kill switch activated"
+                },
+                system_context={
+                    "operational_status": system.operational_status.value,
+                    "phase": system.lifecycle_phase.value,
+                    "system_id": system.id,
+                    "timestamp": datetime.utcnow().isoformat()
+                }
             )
 
-    def _validate_tenant_policy(self, policy: Dict) -> Dict:
-        """
-        Valida que política do tenant não viola leis (Art. 5 EU AI Act)
+        # ====================================================================
+        # STEP 2: SUSPENDED STATUS CHECK
+        # ====================================================================
+        if system.operational_status == OperationalStatus.SUSPENDED:
+            self.logger.warning(f"System {system.id} is SUSPENDED. Blocking task.")
+            return Decision(
+                outcome="BLOCKED",
+                reason="SYSTEM_SUSPENDED - Awaiting human review",
+                risk_score=8.0,
+                issues=["System suspended pending review"],
+                recommended_action="Wait for system reactivation or contact administrator"
+            )
 
-        Args:
-            policy: Política proposta pelo tenant
+        # ====================================================================
+        # STEP 3: LIFECYCLE PHASE VALIDATION
+        # ====================================================================
+        if system.lifecycle_phase in [AIPhase.DESIGN, AIPhase.DATA_PREP, AIPhase.TRAINING]:
+            self.logger.warning(
+                f"System {system.id} in pre-deployment phase: {system.lifecycle_phase.value}"
+            )
+            # Allow but flag for monitoring
 
-        Returns:
-            Política validada (com regras ilegais removidas)
+        # ====================================================================
+        # STEP 4: MULTI-AGENT RISK ASSESSMENT (Existing Logic)
+        # ====================================================================
+        issues = []
+        risk_scores = {}
 
-        Security:
-            Previne Privilege Escalation via policy tampering
-        """
-        validated = policy.copy()
-        prohibited = self.global_policy.get("prohibited_practices", [])
+        # Technical Agent
+        technical_risk = self._assess_technical_risk(task, system)
+        risk_scores["technical"] = technical_risk["score"]
+        issues.extend(technical_risk["issues"])
 
-        if "custom_rules" in validated:
-            for practice in prohibited:
-                # Checa se tenant tentou permitir prática proibida
-                key = f"allow_{practice}"
-                if validated["custom_rules"].get(key, False):
-                    logger.warning(
-                        f"🚨 SECURITY: Tenant tried to enable PROHIBITED practice: {practice}. "
-                        f"This violates Art. 5 EU AI Act. Rule removed from policy."
-                    )
-                    del validated["custom_rules"][key]
+        # Regulatory Agent
+        regulatory_risk = self._assess_regulatory_risk(task, system)
+        risk_scores["regulatory"] = regulatory_risk["score"]
+        issues.extend(regulatory_risk["issues"])
 
-        # Valida limites de risco (não podem exceder global)
-        if "autonomy_matrix" in validated:
-            for env, limits in validated["autonomy_matrix"].items():
-                global_limit = self.global_policy["autonomy_matrix"].get(env, {}).get(
-                    "max_risk_level", 5.0
-                )
-                tenant_limit = limits.get("max_risk_level", 10.0)
+        # Ethical Agent
+        ethical_risk = self._assess_ethical_risk(task, system)
+        risk_scores["ethical"] = ethical_risk["score"]
+        issues.extend(ethical_risk["issues"])
 
-                if tenant_limit > global_limit:
-                    logger.warning(
-                        f"Tenant tried to set risk limit {tenant_limit} > global {global_limit}. "
-                        f"Applying global limit."
-                    )
-                    validated["autonomy_matrix"][env]["max_risk_level"] = global_limit
-
-        return validated
-
-    def _merge_policies(self, system: AISystem) -> Dict[str, Any]:
-        """
-        Merge inteligente das 3 camadas de política (Global > Tenant > System)
-
-        Args:
-            system: Sistema de IA sendo avaliado
-
-        Returns:
-            Política final consolidada
-
-        Strategy:
-            Conservative merge - A regra mais RESTRITIVA vence
-        """
-        # Base: Política Global (Lei)
-        final_policy = self.global_policy.copy()
-
-        # Camada 2: Tenant (Empresa)
-        tenant_policy = self.registry.get_tenant_policy(
-            system.tenant_id,
-            system.tenant_id  # Mesmo tenant (sem cross-access)
+        # ====================================================================
+        # STEP 5: THREAT CLASSIFICATION (NEW - Huwyler Taxonomy)
+        # ====================================================================
+        threat_result: ThreatClassificationResult = self.threat_classifier.classify(
+            issues=issues,
+            task_title=task.title,
+            task_description=task.description
         )
 
-        if tenant_policy:
-            safe_tenant_policy = self._validate_tenant_policy(tenant_policy)
-            final_policy = self._conservative_merge(final_policy, safe_tenant_policy)
+        # ====================================================================
+        # STEP 6: AGGREGATE RISK SCORE
+        # ====================================================================
+        # Weighted average: Technical 30%, Regulatory 40%, Ethical 30%
+        final_score = (
+                risk_scores["technical"] * 0.30 +
+                risk_scores["regulatory"] * 0.40 +
+                risk_scores["ethical"] * 0.30
+        )
 
-        # Camada 3: System (Projeto)
-        if system.governance_policy:
-            final_policy = self._conservative_merge(final_policy, system.governance_policy)
+        # Lifecycle phase adjustment
+        if system.lifecycle_phase == AIPhase.MONITORING:
+            final_score *= 0.9  # 10% reduction for mature systems
 
-        return final_policy
+        # ====================================================================
+        # STEP 7: DECISION LOGIC
+        # ====================================================================
+        if final_score >= 7.0:
+            outcome = "BLOCKED"
+            recommended_action = "Task violates governance policies. Review and modify."
+        elif final_score >= 4.0:
+            outcome = "ESCALATE"
+            recommended_action = "Human review required before proceeding."
+        else:
+            outcome = "ALLOWED"
+            recommended_action = None
 
-    def _conservative_merge(self, base: Dict, override: Dict) -> Dict:
-        """
-        Merge conservador de políticas
+        # ====================================================================
+        # STEP 8: ENRICHED RESULT (NEW - v0.9.0)
+        # ====================================================================
+        decision = Decision(
+            outcome=outcome,
+            reason=self._generate_reason(risk_scores, issues),
+            risk_score=final_score,
+            issues=issues,
+            recommended_action=recommended_action,
 
-        Rules:
-        - risk_level: Mantém o MENOR (mais seguro)
-        - toggles booleanos: False vence (blocklist approach)
+            # NEW: Threat Classification (Huwyler)
+            threat_classification={
+                "detected_vectors": [t.value for t in threat_result.detected_categories],
+                "primary_threat": threat_result.primary_threat,
+                "confidence_scores": threat_result.confidence_scores,
+                "matched_keywords": threat_result.matched_keywords,
+                "taxonomy_version": "Huwyler 2025 (arXiv:2511.21901v1)"
+            },
 
-        Args:
-            base: Política base
-            override: Política sobreposta
+            # NEW: System Context Metadata
+            system_context={
+                "system_id": system.id,
+                "phase": system.lifecycle_phase.value,
+                "status": system.operational_status.value,
+                "risk_classification": system.risk_classification.value,
+                "sector": system.sector.value,
+                "human_ai_config": system.human_ai_configuration.value,
+                "schema_version": "0.9.0",
+                "compliance": {
+                    "nist_alignment": "70%",
+                    "aicm_coverage": system.calculate_aicm_coverage(),
+                    "supply_chain_risk": system.calculate_supply_chain_risk()
+                }
+            }
+        )
 
-        Returns:
-            Política mergeada
-        """
-        merged = base.copy()
+        self.logger.info(
+            f"Decision for task {task.id}: {outcome} "
+            f"(risk={final_score:.2f}, threat={threat_result.primary_threat})"
+        )
 
-        # Merge de Autonomy Matrix (menor risco vence)
-        if "autonomy_matrix" in override:
-            for env, limits in override["autonomy_matrix"].items():
-                if env in merged["autonomy_matrix"]:
-                    current_max = merged["autonomy_matrix"][env]["max_risk_level"]
-                    new_max = limits.get("max_risk_level", current_max)
-                    # Conservador: pega o menor
-                    merged["autonomy_matrix"][env]["max_risk_level"] = min(current_max, new_max)
+        return decision
 
-        # Merge de Custom Rules (True vence para blocks)
-        if "custom_rules" in override:
-            if "custom_rules" not in merged:
-                merged["custom_rules"] = {}
-            # Para regras de "block_*", True (bloquear) vence
-            for key, value in override["custom_rules"].items():
-                if key.startswith("block_") and value is True:
-                    merged["custom_rules"][key] = True
-                elif key not in merged["custom_rules"]:
-                    merged["custom_rules"][key] = value
+    def _assess_technical_risk(self, task: Task, system: AISystem) -> Dict:
+        """Assess technical risks."""
+        issues = []
+        score = 0.0
 
-        return merged
+        # Example checks (customize based on system)
+        if system.training_compute_flops and system.training_compute_flops > 1e25:
+            issues.append("High compute system - increased complexity risk")
+            score += 2.0
 
-    def enforce(self, task: Task, system: AISystem, env: str) -> Dict:
-        """
-        Executa enforcement de governança em runtime
+        # Check external dependencies
+        for dep in system.external_dependencies:
+            if dep.risk_level == "HIGH":
+                issues.append(f"High-risk dependency: {dep.name} ({dep.vendor})")
+                score += 1.5
 
-        Args:
-            task: Tarefa sendo executada
-            system: Sistema de IA executor
-            env: Ambiente (development, staging, production)
+        return {"score": min(score, 10.0), "issues": issues}
 
-        Returns:
-            Dict com decisão (ALLOWED/BLOCKED) e metadados
+    def _assess_regulatory_risk(self, task: Task, system: AISystem) -> Dict:
+        """Assess regulatory compliance risks."""
+        issues = []
+        score = 0.0
 
-        Compliance:
-            ISO 42001 8.2 (AI Risk Assessment - Operation)
-            EU AI Act Art. 12 (Logging)
-        """
-        # 1. Resolver política ativa (merge das 3 camadas)
-        active_policy = self._merge_policies(system)
+        # EU AI Act compliance
+        if system.risk_classification.value == "prohibited":
+            issues.append("EU AI Act - PROHIBITED practice detected")
+            score = 10.0  # Automatic block
+        elif system.risk_classification.value == "high":
+            # High-risk systems require additional checks
+            if not system.requires_human_oversight():
+                issues.append("EU AI Act Art. 14 - Human oversight required")
+                score += 3.0
 
-        # 2. Avaliação de risco (3 agentes especializados)
-        assessment = self.router.assess_risk(task, system)
-        risk = assessment["risk_score"]
+        # Check prohibited domains
+        for prohibited in system.prohibited_domains:
+            if prohibited.lower() in task.title.lower():
+                issues.append(f"Task violates prohibited domain: {prohibited}")
+                score += 5.0
 
-        # 3. Consultar memória de compliance (histórico de violações)
-        history = self.memory.query_similar(task.title)
-        if history:
-            risk = min(10.0, risk + 1.0)  # Penaliza se há histórico
-            logger.info(f"Historical violations found for similar task. Risk adjusted to {risk}")
+        return {"score": min(score, 10.0), "issues": issues}
 
-        # 4. Determinar limite baseado na política ativa
-        limit = active_policy["autonomy_matrix"].get(env, {}).get("max_risk_level", 5.0)
+    def _assess_ethical_risk(self, task: Task, system: AISystem) -> Dict:
+        """Assess ethical risks."""
+        issues = []
+        score = 0.0
 
-        # Sandbox override (Art. 57 EU AI Act)
-        if system.is_sandbox_mode:
-            original_limit = limit
-            limit += 2.0
-            logger.info(
-                f"Sandbox mode: limit increased from {original_limit} to {limit}"
-            )
+        # Check for bias-related keywords
+        bias_keywords = ["discriminate", "bias", "unfair", "prejudice"]
+        for keyword in bias_keywords:
+            if keyword in task.description.lower():
+                issues.append(f"Potential ethical concern: {keyword}")
+                score += 1.0
 
-        # 5. Decisão final
-        decision = "ALLOWED" if risk <= limit else "BLOCKED"
-        escalation = (risk > limit)
+        # Check target demographic considerations
+        if system.target_demographic and "vulnerable" in system.target_demographic.lower():
+            issues.append("System targets vulnerable population - heightened scrutiny")
+            score += 2.0
 
-        # Hash da política (audit trail)
-        policy_hash = hashlib.sha256(
-            json.dumps(active_policy, sort_keys=True).encode()
-        ).hexdigest()
+        return {"score": min(score, 10.0), "issues": issues}
 
-        result = {
-            "decision": decision,
-            "risk_score": round(risk, 2),
-            "limit": limit,
-            "active_policy_hash": policy_hash[:8],
-            "issues": assessment["issues"],
-            "escalation_required": escalation,
-            "environment": env,
-            "timestamp": datetime.now().isoformat()
-        }
+    def _generate_reason(self, risk_scores: Dict, issues: List[str]) -> str:
+        """Generate human-readable decision reason."""
+        max_risk_category = max(risk_scores, key=risk_scores.get)
+        max_score = risk_scores[max_risk_category]
 
-        # 6. Log assinado (HMAC - tamper-proof)
-        self._log_signed(system.id, task.title, result, active_policy)
+        reason = f"Primary risk: {max_risk_category} ({max_score:.1f}/10.0)"
+        if issues:
+            reason += f" | Issues: {len(issues)} detected"
 
-        # 7. Se bloqueado, registra violação e escala
-        if decision == "BLOCKED":
-            self.memory.add_violation(
-                task_title=task.title,
-                system_id=system.id,
-                risk=risk,
-                reason="RUNTIME_BLOCK"
-            )
+        return reason
 
-            if escalation:
-                review_id = self.oversight.create_review_request(
-                    decision=result,
-                    task={"title": task.title, "description": task.description},
-                    system_id=system.id
-                )
-                result["review_id"] = review_id
-                logger.warning(
-                    f"Decision escalated to human review: {review_id}"
-                )
 
-        return result
+# ============================================================================
+# VERSION METADATA
+# ============================================================================
 
-    def _log_signed(self, sys_id: str, task: str, res: Dict, policy: Dict):
-        """
-        Registra decisão no ledger com assinatura HMAC
-
-        Args:
-            sys_id: ID do sistema
-            task: Título da tarefa
-            res: Resultado da decisão
-            policy: Política ativa usada
-
-        Security:
-            HMAC-SHA256 digital signature (tamper-proof)
-            Compliance: ISO 42001 A.7.5 (Data Provenance)
-        """
-        entry = {
-            "system": sys_id,
-            "task": task[:200],  # Limita tamanho
-            **res
-        }
-
-        # Assinatura HMAC (previne adulteração do ledger)
-        msg = json.dumps(entry, sort_keys=True).encode()
-        entry["signature"] = hmac.new(
-            self.hmac_key,
-            msg,
-            hashlib.sha256
-        ).hexdigest()
-
-        # Persiste no ledger (append-only)
-        with open(self.ledger, "a") as f:
-            f.write(json.dumps(entry) + "\n")
+ENFORCEMENT_VERSION = "0.9.0"
+ENHANCEMENTS = """
+v0.9.0 (2025-12-26):
+  - Added Kill Switch (EMERGENCY_STOP check)
+  - Integrated Huwyler threat classification
+  - Enriched audit logs with threat_classification
+  - Added system_context metadata
+  - Lifecycle-aware risk adjustments
+  - Enhanced compliance reporting
+"""

@@ -1,7 +1,7 @@
 
 # EU AI Act Compliance Guide
 
-**BuildToValue Framework v7.3**  
+**BuildToValue Framework v0.9**  
 **Regulation (EU) 2024/1689**  
 **Status:** ✅ Ready for EU Market
 

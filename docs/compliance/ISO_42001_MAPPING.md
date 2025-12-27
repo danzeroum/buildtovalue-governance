@@ -1,6 +1,6 @@
 # ISO/IEC 42001:2023 Compliance Mapping
 
-**BuildToValue Framework v7.3**  
+**BuildToValue Framework v0.9**  
 **Status:** ✅ Compliant (32/32 Annex A Controls Implemented)
 
 ---
@@ -26,7 +26,7 @@ BuildToValue Framework implementa **100% dos controles obrigatórios** da ISO/IE
 | 6.2 | AI Objectives | ✅ Compliant | `autonomy_matrix` (per environment) |
 | 7.1 | Resources | ✅ Compliant | Docker deployment, scalable |
 | 7.2 | Competence | ✅ Compliant | Documentation + training materials |
-| 7.3 | Awareness | ✅ Compliant | Audit logs, notifications |
+| 0.9 | Awareness | ✅ Compliant | Audit logs, notifications |
 | 7.4 | Communication | ✅ Compliant | `HumanOversightService` |
 | 7.5 | Documented Information | ✅ Compliant | Technical documentation |
 | 8.1 | Operational Planning | ✅ Compliant | `governance.yaml` workflows |
@@ -196,7 +196,7 @@ text
 - Retention policies (5-10 years)
 - Data classification
 
-#### A.7.3 Data Quality
+#### A.0.9 Data Quality
 **Status:** ✅ Implemented  
 **Evidence:**
 - Pydantic validation (type checking, constraints)
@@ -347,7 +347,7 @@ text
 - [x] Annex A Controls (32/32)
 
 ### Evidence Package Location
-
+```
 evidence/
 ├── policies/
 │ └── governance.yaml
@@ -361,8 +361,7 @@ evidence/
 │ └── pytest_coverage_report.html
 └── compliance_reports/
 └── iso_42001_compliance_report_*.html
-
-text
+```
 
 ### Recommended Certification Bodies
 

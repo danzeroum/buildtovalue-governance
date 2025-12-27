@@ -4,16 +4,16 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "buildtovalue"
-version = "7.3.0"
+version = "0.9.0"
 description = "Enterprise AI Governance Framework with ISO 42001 Compliance"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "Apache-2.0"}
 authors = [
-    {name = "BuildToValue Contributors", email = "dev@buildtovalue.ai"}
+    {name = "BuildToValue Contributors", email = "dev@buildtovalue.com"}
 ]
 maintainers = [
-    {name = "Daniel Zero", email = "daniel@buildtovalue.ai"}
+    {name = "Daniel Zero", email = "daniel@buildtovalue.com"}
 ]
 keywords = [
     "ai-governance",

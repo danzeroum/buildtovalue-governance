@@ -1,180 +1,165 @@
+#!/usr/bin/env python3
 """
-Entidades de domínio do BuildToValue
-ISO 42001 compliant entity models
+BuildToValue v0.9.0 - Domain Entities
+Merged Schema: Clean Core (No Hacks)
 """
+from dataclasses import dataclass, field
+from typing import List, Dict, Optional, Any
+from datetime import datetime
+from enum import Enum
 
-from typing import List, Optional, Dict, Any
-import re
-from pydantic import BaseModel, Field, ConfigDict, model_validator, field_validator
-from .enums import AIRole, EUComplianceRisk, AISector, ArtifactType
+from .enums import (
+    AIPhase, OperationalStatus, HumanAIConfiguration,
+    EUComplianceRisk, AISector, AIRole, ArtifactType,
+    DecisionOutcome
+)
 
 
-class Task(BaseModel):
-    """
-    Representação de uma tarefa/prompt submetida ao sistema de IA
+# --- Sub-entidades (Helpers) ---
+@dataclass
+class ThirdPartyComponent:
+    name: str
+    version: str
+    vendor: str
+    license_type: str
+    risk_level: str
+    vulnerabilities: List[str] = field(default_factory=list)
 
-    Attributes:
-        title: Título ou conteúdo da tarefa
-        description: Descrição detalhada (opcional)
-        artifact_type: Tipo de artefato a ser gerado
-    """
-    title: str
+
+@dataclass
+class AISystemCostBenefit:
+    deployment_cost_usd: float
+    maintenance_cost_monthly: float
+    expected_benefit_monthly: float
+    error_cost_per_incident: float
+
+
+@dataclass
+class ResidualRiskDisclosure:
+    risk: str
+    likelihood: str
+    impact: str
+    user_guidance: str
+    mitigation_applied: List[str] = field(default_factory=list)
+
+
+@dataclass
+class SocialImpactAssessment:
+    affected_population_size: int
+    demographic_groups_affected: List[str]
+    potential_harms: List[Dict[str, str]]
+    potential_benefits: List[Dict[str, str]]
+    equity_analysis: Optional[Dict[str, float]] = None
+
+
+@dataclass
+class AISystemTeamComposition:
+    system_id: str
+    design_team_size: int
+    disciplines_represented: List[str]
+    stakeholder_groups_consulted: List[str]
+    diversity_statement: str
+    accessibility_expert_involved: bool
+
+
+# --- Entidades Principais ---
+
+@dataclass
+class Task:
+    id: str = field(default_factory=lambda: "unknown")
+    tenant_id: str = field(default_factory=lambda: "unknown")
+    system_id: str = field(default_factory=lambda: "unknown")
+    title: str = ""
     description: str = ""
-    artifact_type: ArtifactType = Field(default=ArtifactType.CODE)
-
-    model_config = ConfigDict(
-        json_schema_extra={
-            "example": {
-                "title": "Gerar relatório financeiro trimestral",
-                "description": "Análise de receitas Q3 2024",
-                "artifact_type": "documentation"
-            }
-        }
-    )
+    artifact_type: ArtifactType = ArtifactType.CODE
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    created_at: datetime = field(default_factory=datetime.utcnow)
 
 
-class AISystem(BaseModel):
+@dataclass
+class AISystem:
     """
-    Representação Segura do Sistema de IA (EU AI Act + ISO 42001)
-
-    Implementa:
-    - Art. 6 EU AI Act (Risk Classification)
-    - Art. 11 EU AI Act (Technical Documentation)
-    - Art. 51 EU AI Act (GPAI Systemic Risk)
-    - ISO 42001 4.1 (Context of Organization)
+    Entidade Unificada do Sistema de IA.
+    Contém campos Legacy (Registry) e Novos (NIST/Gateway).
     """
+    # Identificação & Core
+    id: str
+    tenant_id: str
+    name: str
+    description: Optional[str] = None
+    version: str = "1.0.0"
+    role: AIRole = AIRole.DEPLOYER
+    sector: AISector = AISector.GENERAL
+    risk_classification: EUComplianceRisk = EUComplianceRisk.MINIMAL
 
-    id: str = Field(..., description="Identificador único do sistema")
-    name: str = Field(..., description="Nome do sistema de IA")
-    version: str = Field(default="1.0.0", description="Versão do sistema")
-    role: AIRole = Field(..., description="Papel na cadeia de IA (Art. 28)")
-    risk_classification: EUComplianceRisk = Field(
-        ...,
-        description="Classificação de risco (Art. 6)"
-    )
-    sector: AISector = Field(..., description="Setor de aplicação (Anexo III)")
+    # Governança & Configuração
+    is_sandbox_mode: bool = False
+    logging_capabilities: bool = True
+    jurisdiction: str = "EU"
+    eu_database_registration_id: Optional[str] = None
+    training_compute_flops: Optional[float] = None
+    high_risk_flags: List[str] = field(default_factory=list)
+    governance_policy: Dict[str, Any] = field(default_factory=dict)
 
-    # Multi-tenancy Hardened (BOLA Protection)
-    tenant_id: str = Field(
-        ...,
-        description="ID da organização (UUID v4 obrigatório)"
-    )
+    # NIST / v0.9.0 Lifecycle & Operations
+    lifecycle_phase: AIPhase = AIPhase.DEPLOYMENT
+    operational_status: OperationalStatus = OperationalStatus.ACTIVE
+    human_ai_configuration: HumanAIConfiguration = HumanAIConfiguration.HUMAN_OVER_THE_LOOP
+    intended_purpose: Optional[str] = None
+    prohibited_domains: List[str] = field(default_factory=list)
+    target_demographic: Optional[str] = None
+    expected_benefits: Optional[str] = None
+    external_dependencies: List[ThirdPartyComponent] = field(default_factory=list)
+    estimated_carbon_kg_co2: Optional[float] = None
+    energy_consumption_kwh: Optional[float] = None
+    aicm_controls_applicable: List[str] = field(default_factory=list)
+    aicm_controls_implemented: List[str] = field(default_factory=list)
 
-    # Políticas de Governança
-    governance_policy: Optional[Dict[str, Any]] = Field(
-        default=None,
-        description="Política específica do sistema (Camada 3)"
-    )
+    # Campos Opcionais Complexos
+    cost_benefit_analysis: Optional[AISystemCostBenefit] = None
+    residual_risks: List[ResidualRiskDisclosure] = field(default_factory=list)
+    social_impact: Optional[SocialImpactAssessment] = None
+    team_composition: Optional[AISystemTeamComposition] = None
+    policy_card_uri: Optional[str] = None
 
-    # Compliance e Rastreabilidade
-    jurisdiction: str = Field(
-        default="EU",
-        description="Jurisdição legal (EU, US, BR, etc.)"
-    )
-    high_risk_flags: List[str] = Field(
-        default_factory=list,
-        description="Flags de alto risco identificadas"
-    )
-    eu_database_registration_id: Optional[str] = Field(
-        default=None,
-        description="ID de registro na EU Database (Art. 71)"
-    )
+    # Auditoria
+    created_at: datetime = field(default_factory=datetime.utcnow)
+    updated_at: datetime = field(default_factory=datetime.utcnow)
+    created_by: Optional[str] = None
 
-    # Capacidades Técnicas (ISO 42001 7.2 - Competence)
-    logging_capabilities: bool = Field(
-        default=False,
-        description="Sistema possui capacidade de logging (Art. 12)"
-    )
-    training_compute_flops: Optional[float] = Field(
-        default=None,
-        description="FLOPs de treinamento (Art. 51 - GPAI)"
-    )
+    def requires_human_oversight(self) -> bool:
+        return (self.human_ai_configuration != HumanAIConfiguration.FULLY_AUTONOMOUS
+                or self.risk_classification == EUComplianceRisk.HIGH)
 
-    # Sandbox Mode (Art. 57 EU AI Act)
-    is_sandbox_mode: bool = Field(
-        default=False,
-        description="Sistema em modo sandbox regulatório"
-    )
+    def calculate_aicm_coverage(self) -> float:
+        if not self.aicm_controls_applicable: return 1.0
+        return len(self.aicm_controls_implemented) / len(self.aicm_controls_applicable)
 
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True,
-        json_schema_extra={
-            "example": {
-                "id": "credit-scoring-v2",
-                "name": "Credit Risk Scoring AI",
-                "version": "2.1.0",
-                "role": "deployer",
-                "risk_classification": "high",
-                "sector": "banking",
-                "tenant_id": "550e8400-e29b-41d4-a716-446655440000",
-                "jurisdiction": "EU",
-                "high_risk_flags": [],
-                "eu_database_registration_id": "EU-DB-12345",
-                "logging_capabilities": True,
-                "training_compute_flops": 1e24,
-                "is_sandbox_mode": False
-            }
-        }
-    )
+    def calculate_supply_chain_risk(self) -> str:
+        if not self.external_dependencies: return "LOW"
+        risk_levels = {"LOW": 0, "MEDIUM": 1, "HIGH": 2, "CRITICAL": 3}
+        max_risk = max(risk_levels.get(d.risk_level, 0) for d in self.external_dependencies)
+        return {0: "LOW", 1: "MEDIUM", 2: "HIGH", 3: "CRITICAL"}[max_risk]
 
-    @field_validator('tenant_id')
-    @classmethod
-    def validate_tenant_uuid(cls, v: str) -> str:
-        """
-        Valida que tenant_id é UUID v4 válido (Mass Assignment Protection)
+    def to_dict(self) -> Dict[str, Any]:
+        def serialize(obj):
+            if isinstance(obj, Enum): return obj.value
+            if isinstance(obj, datetime): return obj.isoformat()
+            if isinstance(obj, list): return [serialize(i) for i in obj]
+            if hasattr(obj, '__dataclass_fields__'): return {k: serialize(v) for k, v in obj.__dict__.items()}
+            return obj
 
-        Previne: Tenant ID forgery attacks
-        Compliance: ISO 42001 B.4.6 (Human Resources - Access Control)
-        """
-        uuid_pattern = r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-        if not re.match(uuid_pattern, v, re.IGNORECASE):
-            raise ValueError(
-                f"tenant_id deve ser UUID v4 válido, recebido: {v}. "
-                f"Use: import uuid; str(uuid.uuid4())"
-            )
-        return v.lower()
+        return {k: serialize(v) for k, v in self.__dict__.items()}
 
-    @model_validator(mode='after')
-    def check_systemic_risk(self) -> 'AISystem':
-        """
-        Valida classificação de GPAI sistêmico (Art. 51 EU AI Act)
 
-        Sistemas com FLOPs > 10^25 devem ser classificados como SYSTEMIC_GPAI
-        """
-        threshold = 1e25
-        if self.training_compute_flops and self.training_compute_flops > threshold:
-            if self.risk_classification != EUComplianceRisk.SYSTEMIC_GPAI:
-                raise ValueError(
-                    f"Sistema com {self.training_compute_flops:.2e} FLOPs (> 10^25) "
-                    f"requer classificação SYSTEMIC_GPAI (Art. 51 EU AI Act). "
-                    f"Classificação atual: {self.risk_classification.value}"
-                )
-        return self
-
-    @model_validator(mode='after')
-    def validate_high_risk_requirements(self) -> 'AISystem':
-        """
-        Valida requisitos adicionais para sistemas de alto risco (Art. 6)
-        """
-        if self.risk_classification == EUComplianceRisk.HIGH:
-            # Sistemas de alto risco DEVEM ter logging (Art. 12)
-            if not self.logging_capabilities:
-                raise ValueError(
-                    f"Sistemas de ALTO RISCO devem ter logging_capabilities=True "
-                    f"(Art. 12 EU AI Act - Logging)"
-                )
-
-            # Setores de alto risco devem ter registro EU
-            high_risk_sectors = [
-                AISector.BIOMETRIC,
-                AISector.LAW_ENFORCEMENT,
-                AISector.JUSTICE,
-                AISector.CRITICAL_INFRASTRUCTURE
-            ]
-            if self.sector in high_risk_sectors and not self.eu_database_registration_id:
-                raise ValueError(
-                    f"Sistemas de alto risco no setor {self.sector.value} "
-                    f"devem ter eu_database_registration_id (Art. 71)"
-                )
-
-        return self
+@dataclass
+class Decision:
+    """Decision entity (Pure Dataclass - No Hacks)"""
+    outcome: str
+    reason: str
+    risk_score: float
+    issues: List[str]
+    recommended_action: Optional[str] = None
+    threat_classification: Optional[Dict[str, Any]] = None
+    system_context: Optional[Dict[str, Any]] = None
+    timestamp: datetime = field(default_factory=datetime.utcnow)

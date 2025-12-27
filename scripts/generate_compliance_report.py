@@ -317,10 +317,10 @@ def generate_html_report(metrics: Dict, output_file: Path):
         </div>
 
         <div class="footer">
-            <p><strong>BuildToValue Framework v7.3</strong></p>
+            <p><strong>BuildToValue Framework v0.9</strong></p>
             <p>Enterprise AI Governance Platform</p>
             <p style="margin-top: 10px; font-size: 0.9rem;">
-                For questions: compliance@buildtovalue.ai | Documentation: docs.buildtovalue.ai
+                For questions: compliance@buildtovalue.com | Documentation: docs.buildtovalue.ai
             </p>
         </div>
     </div>
@@ -337,7 +337,7 @@ def generate_json_report(metrics: Dict, output_file: Path):
     """Gera relatório em JSON"""
 
     report_data = {
-        "title": "BuildToValue v7.3 - ISO 42001:2023 Compliance Report",
+        "title": "BuildToValue v0.9 - ISO 42001:2023 Compliance Report",
         "generated_at": datetime.now().isoformat(),
         "summary": {
             "compliance_percentage": 100,

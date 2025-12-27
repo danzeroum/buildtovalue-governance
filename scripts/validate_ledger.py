@@ -149,7 +149,7 @@ def main():
             print(f"\n{'─' * 80}")
             print(f"🚨 CRITICAL: Ledger integrity compromised!")
             print(f"   Action required: Investigate security breach (ISO 42001 Art. 12)")
-            print(f"   Contact: security@buildtovalue.ai")
+            print(f"   Contact: security@buildtovalue.com")
             print(f"{'=' * 80}\n")
             sys.exit(1)
         else:

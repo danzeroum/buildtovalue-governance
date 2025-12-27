@@ -60,7 +60,7 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 
 feat: add support for MongoDB backend
 fix: prevent BOLA attack in tenant isolation
-docs: update API reference for v7.3
+docs: update API reference for v0.9
 test: add integration tests for enforcement engine
 
 text

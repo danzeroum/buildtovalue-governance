@@ -1,6 +1,6 @@
 # BuildToValue Architecture
 
-**Version:** 7.3.0  
+**Version:** 0.9.0  
 **Type:** Enterprise AI Governance Framework  
 **Architecture Pattern:** Layered Architecture + Domain-Driven Design
 
