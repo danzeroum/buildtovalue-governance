@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
+
 """
-BuildToValue v0.9.0 - Enforcement Engine
-ARQUIVO: src/core/governance/enforcement.py (ATUALIZAR ESTE ARQUIVO)
-Updated with Kill Switch, Threat Classification, and Enhanced Logging.
+BuildToValue v0.9.1 - Enforcement Engine (CORRIGIDO)
+ARQUIVO: src/core/governance/enforcement.py
 """
 
 from typing import Dict, List, Any, Optional
@@ -12,11 +12,9 @@ import logging
 from src.domain.entities import AISystem, Task, Decision
 from src.domain.enums import OperationalStatus, AIPhase
 
-# ✅ IMPORT RELATIVO (funciona dentro de /governance)
 try:
     from .threat_classifier import ThreatVectorClassifier, ThreatClassificationResult
 except ImportError:
-    # Fallback para import absoluto
     from src.core.governance.threat_classifier import (
         ThreatVectorClassifier,
         ThreatClassificationResult
@@ -28,20 +26,13 @@ logger = logging.getLogger(__name__)
 class RuntimeEnforcementEngine:
     """
     Core enforcement engine with multi-agent assessment.
-
-    v0.9.0 Enhancements:
-    - Kill Switch (EMERGENCY_STOP check)
-    - Huwyler threat classification
-    - Enriched audit logs
-    - Lifecycle-aware risk scoring
-
-    References:
-    - NIST AI RMF 1.0: MANAGE-2.4 (Operational controls)
-    - Policy Cards: Runtime enforcement architecture
+    v0.9.1 Fixes:
+    - ✅ Corrected ethical agent to check title + description
+    - ✅ Integrated threat score into final risk calculation
+    - ✅ Increased penalty weights for detected threats
     """
 
     def __init__(self):
-        """Initialize enforcement engine with threat classifier."""
         self.threat_classifier = ThreatVectorClassifier(use_simplified=True)
         self.logger = logging.getLogger(__name__)
 
@@ -53,22 +44,6 @@ class RuntimeEnforcementEngine:
     ) -> Decision:
         """
         Evaluate task against system policies with enhanced threat analysis.
-
-        Args:
-            task: Task to evaluate
-            system: AI system configuration
-            policies: Optional governance policies
-
-        Returns:
-            Decision with threat classification and system context
-
-        Workflow:
-        1. **KILL SWITCH CHECK** (new in v0.9.0)
-        2. Lifecycle validation
-        3. Multi-agent risk assessment
-        4. Threat classification (Huwyler)
-        5. Policy enforcement
-        6. Enriched logging
         """
 
         # ====================================================================
@@ -79,10 +54,11 @@ class RuntimeEnforcementEngine:
                 f"EMERGENCY_STOP activated for system {system.id}. "
                 f"All operations blocked."
             )
+
             return Decision(
                 outcome="BLOCKED",
                 reason="KILL_SWITCH_ACTIVE - System under emergency stop",
-                risk_score=10.0,  # Maximum risk
+                risk_score=10.0,
                 issues=["Emergency stop activated"],
                 recommended_action="Contact system administrator for reactivation",
                 threat_classification={
@@ -117,10 +93,9 @@ class RuntimeEnforcementEngine:
             self.logger.warning(
                 f"System {system.id} in pre-deployment phase: {system.lifecycle_phase.value}"
             )
-            # Allow but flag for monitoring
 
         # ====================================================================
-        # STEP 4: MULTI-AGENT RISK ASSESSMENT (Existing Logic)
+        # STEP 4: MULTI-AGENT RISK ASSESSMENT
         # ====================================================================
         issues = []
         risk_scores = {}
@@ -135,13 +110,13 @@ class RuntimeEnforcementEngine:
         risk_scores["regulatory"] = regulatory_risk["score"]
         issues.extend(regulatory_risk["issues"])
 
-        # Ethical Agent
+        # Ethical Agent (CORRIGIDO)
         ethical_risk = self._assess_ethical_risk(task, system)
         risk_scores["ethical"] = ethical_risk["score"]
         issues.extend(ethical_risk["issues"])
 
         # ====================================================================
-        # STEP 5: THREAT CLASSIFICATION (NEW - Huwyler Taxonomy)
+        # STEP 5: THREAT CLASSIFICATION (Huwyler Taxonomy)
         # ====================================================================
         threat_result: ThreatClassificationResult = self.threat_classifier.classify(
             issues=issues,
@@ -149,15 +124,35 @@ class RuntimeEnforcementEngine:
             task_description=task.description
         )
 
+        # ✅ CORREÇÃO 1: Adicionar ameaça detectada aos issues
+        if threat_result.primary_threat != "other":
+            issues.append(f"Threat detected: {threat_result.primary_threat}")
+
         # ====================================================================
-        # STEP 6: AGGREGATE RISK SCORE
+        # STEP 6: AGGREGATE RISK SCORE (CORRIGIDO)
         # ====================================================================
-        # Weighted average: Technical 30%, Regulatory 40%, Ethical 30%
-        final_score = (
-                risk_scores["technical"] * 0.30 +
-                risk_scores["regulatory"] * 0.40 +
-                risk_scores["ethical"] * 0.30
+
+        # ✅ CORREÇÃO 2: Calcular penalidade por ameaça
+        threat_score_penalty = 0.0
+        if threat_result.primary_threat != "other":
+            # Pega a confiança (0.0 a 1.0) e multiplica por 10 para score de risco
+            confidence = threat_result.confidence_scores.get(
+                threat_result.primary_threat, 0.0
+            )
+            threat_score_penalty = confidence * 10.0
+
+        # Weighted average dos agentes
+        base_score = (
+                risk_scores["technical"] * 0.20 +
+                risk_scores["regulatory"] * 0.30 +
+                risk_scores["ethical"] * 0.20
         )
+
+        # ✅ CORREÇÃO 3: Incluir threat score no cálculo (peso 30%)
+        final_score = base_score + (threat_score_penalty * 0.30)
+
+        # Cap em 10.0
+        final_score = min(final_score, 10.0)
 
         # Lifecycle phase adjustment
         if system.lifecycle_phase == AIPhase.MONITORING:
@@ -177,7 +172,7 @@ class RuntimeEnforcementEngine:
             recommended_action = None
 
         # ====================================================================
-        # STEP 8: ENRICHED RESULT (NEW - v0.9.0)
+        # STEP 8: ENRICHED RESULT
         # ====================================================================
         decision = Decision(
             outcome=outcome,
@@ -185,8 +180,6 @@ class RuntimeEnforcementEngine:
             risk_score=final_score,
             issues=issues,
             recommended_action=recommended_action,
-
-            # NEW: Threat Classification (Huwyler)
             threat_classification={
                 "detected_vectors": [t.value for t in threat_result.detected_categories],
                 "primary_threat": threat_result.primary_threat,
@@ -194,8 +187,6 @@ class RuntimeEnforcementEngine:
                 "matched_keywords": threat_result.matched_keywords,
                 "taxonomy_version": "Huwyler 2025 (arXiv:2511.21901v1)"
             },
-
-            # NEW: System Context Metadata
             system_context={
                 "system_id": system.id,
                 "phase": system.lifecycle_phase.value,
@@ -203,7 +194,7 @@ class RuntimeEnforcementEngine:
                 "risk_classification": system.risk_classification.value,
                 "sector": system.sector.value,
                 "human_ai_config": system.human_ai_configuration.value,
-                "schema_version": "0.9.0",
+                "schema_version": "0.9.1",
                 "compliance": {
                     "nist_alignment": "70%",
                     "aicm_coverage": system.calculate_aicm_coverage(),
@@ -246,13 +237,14 @@ class RuntimeEnforcementEngine:
         if system.risk_classification.value == "prohibited":
             issues.append("EU AI Act - PROHIBITED practice detected")
             score = 10.0  # Automatic block
+
         elif system.risk_classification.value == "high":
             # High-risk systems require additional checks
             if not system.requires_human_oversight():
                 issues.append("EU AI Act Art. 14 - Human oversight required")
                 score += 3.0
 
-        # Check prohibited domains
+        # ✅ CORREÇÃO 4: Verificar prohibited_domains no title também
         for prohibited in system.prohibited_domains:
             if prohibited.lower() in task.title.lower():
                 issues.append(f"Task violates prohibited domain: {prohibited}")
@@ -261,16 +253,26 @@ class RuntimeEnforcementEngine:
         return {"score": min(score, 10.0), "issues": issues}
 
     def _assess_ethical_risk(self, task: Task, system: AISystem) -> Dict:
-        """Assess ethical risks."""
+        """
+        Assess ethical risks.
+        ✅ CORRIGIDO: Verifica title E description
+        """
         issues = []
         score = 0.0
 
-        # Check for bias-related keywords
-        bias_keywords = ["discriminate", "bias", "unfair", "prejudice"]
+        # ✅ CORREÇÃO 5: Concatenar title + description
+        content_to_check = (task.title + " " + task.description).lower()
+
+        # ✅ CORREÇÃO 6: Keywords expandidas + peso aumentado
+        bias_keywords = [
+            "discriminate", "bias", "unfair", "prejudice",
+            "deny loan", "zip code", "redline", "race", "gender"
+        ]
+
         for keyword in bias_keywords:
-            if keyword in task.description.lower():
+            if keyword in content_to_check:
                 issues.append(f"Potential ethical concern: {keyword}")
-                score += 1.0
+                score += 2.5  # ✅ Peso aumentado de 1.0 para 2.5
 
         # Check target demographic considerations
         if system.target_demographic and "vulnerable" in system.target_demographic.lower():
@@ -285,6 +287,7 @@ class RuntimeEnforcementEngine:
         max_score = risk_scores[max_risk_category]
 
         reason = f"Primary risk: {max_risk_category} ({max_score:.1f}/10.0)"
+
         if issues:
             reason += f" | Issues: {len(issues)} detected"
 
@@ -294,14 +297,18 @@ class RuntimeEnforcementEngine:
 # ============================================================================
 # VERSION METADATA
 # ============================================================================
-
-ENFORCEMENT_VERSION = "0.9.0"
+ENFORCEMENT_VERSION = "0.9.1"
 ENHANCEMENTS = """
+v0.9.1 (2025-12-27):
+- ✅ FIXED: Ethical agent now checks title + description (not just description)
+- ✅ FIXED: Threat classification score integrated into final risk (30% weight)
+- ✅ FIXED: Increased ethical keyword penalties (1.0 → 2.5)
+- ✅ FIXED: Added threat detection to issues list
+- ✅ FIXED: Regulatory agent checks prohibited domains in title
+
 v0.9.0 (2025-12-26):
-  - Added Kill Switch (EMERGENCY_STOP check)
-  - Integrated Huwyler threat classification
-  - Enriched audit logs with threat_classification
-  - Added system_context metadata
-  - Lifecycle-aware risk adjustments
-  - Enhanced compliance reporting
+- Added Kill Switch (EMERGENCY_STOP check)
+- Integrated Huwyler threat classification
+- Enriched audit logs with threat_classification
+- Added system_context metadata
 """
