@@ -80,22 +80,37 @@ class HumanAIConfiguration(str, Enum):
     HUMAN_OVER_THE_LOOP = "human_over_the_loop"
     FULLY_AUTONOMOUS = "fully_autonomous"
 
-class ThreatCategory(str, Enum):
-    MISUSE = "misuse"
-    UNRELIABLE = "unreliable_outputs"
-    SECURITY = "security"
-    PRIVACY = "privacy"
-    FAIRNESS = "fairness"
-    DRIFT = "drift"
-    OTHER = "other"
+class ThreatCategory(Enum):
+    """
+    Simplified threat categories (7 categories)
+    """
+    MISUSE = "MISUSE"
+    UNRELIABLE = "UNRELIABLE"
+    PRIVACY = "PRIVACY"
+    FAIRNESS = "FAIRNESS"
+    SECURITY = "SECURITY"
+    DRIFT = "DRIFT"
+    OTHER = "OTHER"
 
-class ThreatDomain(str, Enum):
-    MISUSE = "misuse"
-    POISONING = "poisoning"
-    PRIVACY = "privacy"
-    ADVERSARIAL = "adversarial"
-    BIASES = "biases"
-    UNRELIABLE_OUTPUTS = "unreliable_outputs"
-    DRIFT = "drift"
-    SUPPLY_CHAIN = "supply_chain"
-    IP_THREAT = "ip_threat"
+class ThreatDomain(Enum):
+    """
+    Full threat taxonomy (9 domains - Huwyler 2025)
+    """
+    MISUSE = "MISUSE"
+    POISONING = "POISONING"
+    PRIVACY = "PRIVACY"
+    ADVERSARIAL = "ADVERSARIAL"
+    BIASES = "BIASES"
+    UNRELIABLE_OUTPUTS = "UNRELIABLE_OUTPUTS"
+    DRIFT = "DRIFT"
+    SUPPLY_CHAIN = "SUPPLY_CHAIN"
+    IP_THREAT = "IP_THREAT"
+
+class Outcome(Enum):
+    """
+    Enforcement decision outcomes
+    """
+    APPROVED = "APPROVED"
+    BLOCKED = "BLOCKED"
+    ESCALATE = "ESCALATE"
+    CONDITIONAL = "CONDITIONAL"

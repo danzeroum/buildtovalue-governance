@@ -31,7 +31,7 @@ from src.core.governance.threat_classifier import (
     ThreatVectorClassifier
 )
 from src.domain.enums import ThreatDomain, Outcome
-from src.domain.models import Task, AISystem
+from src.domain.entities import Task, AISystem
 
 
 class TestRegulatoryPenaltyLoader(unittest.TestCase):

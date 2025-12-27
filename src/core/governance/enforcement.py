@@ -25,7 +25,7 @@ from pathlib import Path
 import logging
 
 from src.domain.enums import ThreatDomain, ThreatCategory, Outcome
-from src.domain.models import Task, AISystem
+from src.domain.entities import Task, AISystem
 from src.core.governance.threat_classifier import (
     ThreatVectorClassifier,
     ThreatClassificationResult
