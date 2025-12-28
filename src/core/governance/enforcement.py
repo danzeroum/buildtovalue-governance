@@ -11,7 +11,7 @@ from pathlib import Path
 import logging
 from datetime import datetime, timezone  # ✅ FIX: Added timezone
 
-from src.domain.enums import ThreatDomain, ThreatCategory, Outcome
+from src.domain.enums import ThreatDomain, ThreatCategory, Outcome, OperationalStatus
 from src.domain.entities import Task, AISystem
 from src.core.governance.threat_classifier import (
     ThreatVectorClassifier,
@@ -407,6 +407,32 @@ class EnforcementEngine:
             issues: Optional[List[str]] = None
     ) -> Decision:
         """Enforce governance policy with regulatory impact assessment."""
+
+        # ✅ PRIORITY ZERO: Kill Switch Check (v0.9.0)
+        # Must be first - overrides all other logic
+        if system.operational_status == OperationalStatus.EMERGENCY_STOP:
+            logger.critical(
+                f"🔴 KILL SWITCH ACTIVE: System {system.id} blocked "
+                f"(tenant: {system.tenant_id})"
+            )
+            return Decision(
+                outcome=Outcome.BLOCKED,
+                risk_score=10.0,
+                reason="KILL_SWITCH_ACTIVE: System operations suspended via emergency protocol",
+                detected_threats=["EMERGENCY_STOP"],
+                confidence=1.0,
+                recommendations=[
+                    "🚨 URGENT: System halted by administrator",
+                    "📋 Contact system owner to understand emergency cause",
+                    "⚠️ Do NOT resume operations without approval",
+                    "📞 Escalate to: Governance Team / CISO"
+                ],
+                controls_applied=["Emergency Stop Protocol"],
+                baseline_risk=10.0,
+                sub_threat_type="emergency_stop_active"
+            )
+
+        # Original code continues below...
         issues_to_analyze = issues or []
 
         classification = self.classifier.classify(

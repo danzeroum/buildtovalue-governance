@@ -10,8 +10,7 @@ from enum import Enum
 
 from .enums import (
     AIPhase, OperationalStatus, HumanAIConfiguration,
-    EUComplianceRisk, AISector, AIRole, ArtifactType,
-    DecisionOutcome
+    EUComplianceRisk, AISector, AIRole, ArtifactType
 )
 
 

@@ -1,10 +1,13 @@
 """
 System Registry with Multi-Tenant Isolation (BOLA Protection)
+✅ UPDATED v0.9.0: Added Kill Switch support and NIST AI RMF schema
 
 Implements:
 - SQL Injection Prevention (SQLAlchemy ORM)
 - BOLA/IDOR Protection (tenant_id validation)
 - ISO 42001 A.10.2 (Allocating Responsibilities)
+- Kill Switch (operational_status column)
+- NIST AI RMF lifecycle tracking (lifecycle_phase column)
 """
 
 from sqlalchemy import create_engine, Column, String, DateTime, JSON, Integer, Index
@@ -13,9 +16,17 @@ from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 from typing import Optional, Dict
 import logging
+import os
 
 from src.domain.entities import AISystem
-from src.domain.enums import AISector, AIRole, EUComplianceRisk
+from src.domain.enums import (
+    AISector,
+    AIRole,
+    EUComplianceRisk,
+    AIPhase,                      # ✅ ADDED v0.9.0
+    OperationalStatus,            # ✅ ADDED v0.9.0
+    HumanAIConfiguration          # ✅ ADDED v0.9.0
+)
 
 Base = declarative_base()
 logger = logging.getLogger("btv.registry")
@@ -42,11 +53,13 @@ class TenantModel(Base):
 class AISystemModel(Base):
     """
     AI System Model (Layer 3 - Project)
+    ✅ UPDATED v0.9.0: Added columns for Kill Switch and NIST lifecycle tracking
 
     Implements multi-tenant isolation via tenant_id index
     """
     __tablename__ = "ai_systems"
 
+    # Existing columns (unchanged)
     id = Column(String, primary_key=True)
     tenant_id = Column(String, nullable=False, index=True)  # Logical FK + Index
     name = Column(String, nullable=False)
@@ -61,6 +74,12 @@ class AISystemModel(Base):
     eu_database_registration_id = Column(String, nullable=True)
     logging_capabilities = Column(Integer, default=0)
     jurisdiction = Column(String, default="EU")
+
+    # ✅ NEW COLUMNS v0.9.0 (Kill Switch + NIST AI RMF)
+    lifecycle_phase = Column(String, default="deployment")
+    operational_status = Column(String, default="active")
+    human_ai_configuration = Column(String, default="human_over_the_loop")
+
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -76,6 +95,7 @@ class AISystemModel(Base):
 class SystemRegistry:
     """
     AI System Registry with Multi-Tenant Isolation
+    ✅ UPDATED v0.9.0: Added update_system() method for Kill Switch persistence
 
     Security Features:
     - SQL Injection Prevention: SQLAlchemy ORM (no raw queries)
@@ -83,13 +103,18 @@ class SystemRegistry:
     - Audit Trail: created_at/updated_at timestamps
     """
 
-    def __init__(self, db_url: str = "sqlite:///./data/btv_registry.db"):
+    def __init__(self, db_url: str = None):
         """
         Initialize registry with database
 
         Args:
             db_url: Database URL (SQLite or PostgreSQL)
+                    If None, reads from DB_URL env var or defaults to SQLite
         """
+        # ✅ IMPROVED: Support environment variable
+        if not db_url:
+            db_url = os.getenv("DB_URL", "sqlite:///./data/btv_registry.db")
+
         self.engine = create_engine(
             db_url,
             echo=False,  # Set True for SQL debug
@@ -187,6 +212,7 @@ class SystemRegistry:
     ) -> str:
         """
         Register AI system with tenant validation
+        ✅ UPDATED v0.9.0: Now persists operational_status, lifecycle_phase, human_ai_configuration
 
         Args:
             system: AISystem entity
@@ -219,6 +245,12 @@ class SystemRegistry:
                 sector=system.sector.value,
                 role=system.role.value,
                 risk_classification=system.risk_classification.value,
+
+                # ✅ NEW v0.9.0: Map Kill Switch and lifecycle fields
+                lifecycle_phase=system.lifecycle_phase.value,
+                operational_status=system.operational_status.value,
+                human_ai_configuration=system.human_ai_configuration.value,
+
                 high_risk_flags=system.high_risk_flags,
                 governance_policy=system.governance_policy,
                 is_sandbox_mode=1 if system.is_sandbox_mode else 0,
@@ -233,7 +265,8 @@ class SystemRegistry:
             logger.info(
                 f"AI System registered: {system.id} | "
                 f"Tenant: {requesting_tenant} | "
-                f"Risk: {system.risk_classification.value}"
+                f"Risk: {system.risk_classification.value} | "
+                f"Status: {system.operational_status.value}"  # ✅ Log status
             )
             return system.id
 
@@ -244,6 +277,29 @@ class SystemRegistry:
         finally:
             session.close()
 
+    def update_system(
+            self,
+            system: AISystem,
+            requesting_tenant: str
+    ) -> str:
+        """
+        ✅ ADDED v0.9.0: Update existing AI system (alias for register_system)
+
+        This method was missing and caused HTTP 500 errors in /emergency-stop endpoint.
+        Since SQLAlchemy's merge() performs upsert, we can reuse register_system().
+
+        Args:
+            system: AISystem entity with updated fields
+            requesting_tenant: Tenant ID from JWT token
+
+        Returns:
+            Updated system_id
+
+        Usage:
+            Used by Kill Switch endpoint to persist operational_status changes
+        """
+        return self.register_system(system, requesting_tenant)
+
     def get_system(
             self,
             system_id: str,
@@ -251,6 +307,7 @@ class SystemRegistry:
     ) -> Optional[AISystem]:
         """
         Retrieve system with multi-tenant isolation
+        ✅ UPDATED v0.9.0: Reconstructs entity with v0.9.0 fields (backward compatible)
 
         Args:
             system_id: System ID
@@ -277,6 +334,11 @@ class SystemRegistry:
                 )
                 return None
 
+            # ✅ BACKWARD COMPATIBILITY: Handle old records without v0.9.0 columns
+            lifecycle = getattr(model, 'lifecycle_phase', 'deployment') or 'deployment'
+            status = getattr(model, 'operational_status', 'active') or 'active'
+            human_cfg = getattr(model, 'human_ai_configuration', 'human_over_the_loop') or 'human_over_the_loop'
+
             # Rebuild entity
             return AISystem(
                 id=model.id,
@@ -286,6 +348,12 @@ class SystemRegistry:
                 role=AIRole(model.role),
                 sector=AISector(model.sector),
                 risk_classification=EUComplianceRisk(model.risk_classification),
+
+                # ✅ NEW v0.9.0: Reconstruct with lifecycle fields
+                lifecycle_phase=AIPhase(lifecycle),
+                operational_status=OperationalStatus(status),
+                human_ai_configuration=HumanAIConfiguration(human_cfg),
+
                 high_risk_flags=model.high_risk_flags or [],
                 governance_policy=model.governance_policy or {},
                 is_sandbox_mode=bool(model.is_sandbox_mode),
@@ -301,6 +369,7 @@ class SystemRegistry:
     def list_systems_by_tenant(self, tenant_id: str, limit: int = 100) -> list:
         """
         List all systems of a tenant
+        ✅ UPDATED v0.9.0: Returns systems with v0.9.0 fields
 
         Args:
             tenant_id: Tenant ID
@@ -315,25 +384,14 @@ class SystemRegistry:
                 tenant_id=tenant_id
             ).limit(limit).all()
 
-            return [
-                AISystem(
-                    id=m.id,
-                    tenant_id=m.tenant_id,
-                    name=m.name,
-                    version=m.version,
-                    role=AIRole(m.role),
-                    sector=AISector(m.sector),
-                    risk_classification=EUComplianceRisk(m.risk_classification),
-                    high_risk_flags=m.high_risk_flags or [],
-                    governance_policy=m.governance_policy or {},
-                    is_sandbox_mode=bool(m.is_sandbox_mode),
-                    training_compute_flops=m.training_compute_flops,
-                    eu_database_registration_id=m.eu_database_registration_id,
-                    logging_capabilities=bool(m.logging_capabilities),
-                    jurisdiction=m.jurisdiction
-                )
-                for m in models
-            ]
+            # ✅ Use get_system() for consistent entity reconstruction
+            systems = []
+            for model in models:
+                system = self.get_system(model.id, tenant_id)
+                if system:
+                    systems.append(system)
+
+            return systems
 
         finally:
             session.close()
