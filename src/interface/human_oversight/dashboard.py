@@ -1,7 +1,7 @@
 """
 Human Oversight Dashboard Service
 
-Implementa:
+Implements:
 - EU AI Act Art. 14 (Human Oversight)
 - ISO 42001 10.2 (Nonconformity and Corrective Action)
 """
@@ -17,12 +17,12 @@ logger = logging.getLogger("btv.oversight")
 
 class HumanOversightService:
     """
-    Serviço de supervisão humana para decisões de alto risco
+    Human supervision service for high-risk decisions
 
     Features:
-    - Criação de requisições de revisão
-    - Workflow de aprovação/rejeição
-    - Tracking de justificativas
+    - Review request creation
+    - Approval/rejection workflow
+    - Justification tracking
 
     Compliance:
         EU AI Act Art. 14 (Human Oversight Requirements)
@@ -30,15 +30,14 @@ class HumanOversightService:
 
     def __init__(self, ledger_path: Path):
         """
-        Inicializa serviço de oversight
+        Initialize oversight service
 
         Args:
-            ledger_path: Path do ledger principal (para derivar path das reviews)
+            ledger_path: Main ledger path (to derive reviews path)
         """
         self.ledger_path = ledger_path
         self.pending_reviews_file = ledger_path.parent / "pending_reviews.jsonl"
         self.pending_reviews_file.touch(exist_ok=True)
-
         logger.info(f"HumanOversightService initialized")
 
     def create_review_request(
@@ -48,15 +47,15 @@ class HumanOversightService:
             system_id: str
     ) -> str:
         """
-        Cria requisição de revisão humana
+        Create human review request
 
         Args:
-            decision: Decisão de enforcement que foi bloqueada
-            task: Dados da tarefa
-            system_id: ID do sistema
+            decision: Enforcement decision that was blocked
+            task: Task data
+            system_id: System ID
 
         Returns:
-            ID da requisição de revisão
+            Review request ID
 
         Compliance:
             EU AI Act Art. 14 (Human Oversight)
@@ -84,7 +83,7 @@ class HumanOversightService:
 
         logger.warning(
             f"🔔 Decision escalated to human review: {request_id} | "
-            f"Risk: {decision.get('risk_score')} | Sistema: {system_id}"
+            f"Risk: {decision.get('risk_score')} | System: {system_id}"
         )
 
         return request_id
@@ -96,15 +95,15 @@ class HumanOversightService:
             justification: str
     ) -> bool:
         """
-        Aprova requisição de revisão (admin ou auditor apenas)
+        Approve review request (admin or auditor only)
 
         Args:
-            request_id: ID da requisição
-            reviewer: Email/ID do revisor
-            justification: Justificativa da aprovação
+            request_id: Request ID
+            reviewer: Reviewer email/ID
+            justification: Approval justification
 
         Returns:
-            True se sucesso
+            True if successful
         """
         return self._update_review(request_id, "APPROVED", reviewer, justification)
 
@@ -115,15 +114,15 @@ class HumanOversightService:
             justification: str
     ) -> bool:
         """
-        Rejeita requisição de revisão (mantém bloqueio)
+        Reject review request (maintains block)
 
         Args:
-            request_id: ID da requisição
-            reviewer: Email/ID do revisor
-            justification: Justificativa da rejeição
+            request_id: Request ID
+            reviewer: Reviewer email/ID
+            justification: Rejection justification
 
         Returns:
-            True se sucesso
+            True if successful
         """
         return self._update_review(request_id, "REJECTED", reviewer, justification)
 
@@ -135,20 +134,20 @@ class HumanOversightService:
             justification: str
     ) -> bool:
         """
-        Atualiza status da revisão
+        Update review status
 
         Note:
-            Implementação simplificada (append-only log).
-            Em produção: usar DB transacional para updates atômicos.
+            Simplified implementation (append-only log).
+            In production: use transactional DB for atomic updates.
 
         Args:
-            request_id: ID da requisição
-            decision: APPROVED ou REJECTED
-            reviewer: Email/ID do revisor
-            justification: Justificativa
+            request_id: Request ID
+            decision: APPROVED or REJECTED
+            reviewer: Reviewer email/ID
+            justification: Justification
 
         Returns:
-            True se sucesso
+            True if successful
         """
         update_entry = {
             "request_id": request_id,
@@ -158,8 +157,8 @@ class HumanOversightService:
             "justification": justification
         }
 
-        # Em produção: atualizar entrada existente no DB
-        # Aqui: apenas logamos a atualização
+        # In production: update existing entry in DB
+        # Here: just log the update
         with open(self.pending_reviews_file, "a") as f:
             f.write(json.dumps(update_entry) + "\n")
 
@@ -172,20 +171,20 @@ class HumanOversightService:
 
     def get_pending_reviews(self, limit: int = 10) -> List[Dict]:
         """
-        Lista revisões pendentes
+        List pending reviews
 
         Args:
-            limit: Número máximo de resultados
+            limit: Maximum number of results
 
         Returns:
-            Lista de revisões pendentes
+            List of pending reviews
         """
         pending = []
 
         if not self.pending_reviews_file.exists():
             return []
 
-        # Lê arquivo e filtra por status PENDING
+        # Read file and filter by PENDING status
         with open(self.pending_reviews_file, "r") as f:
             for line in f:
                 try:
@@ -195,7 +194,7 @@ class HumanOversightService:
                 except json.JSONDecodeError:
                     continue
 
-        # Ordena por timestamp (mais recentes primeiro)
+        # Sort by timestamp (most recent first)
         pending.sort(
             key=lambda x: x.get("created_at", ""),
             reverse=True

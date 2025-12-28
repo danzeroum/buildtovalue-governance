@@ -104,11 +104,9 @@ penalties:
         try:
             loader = RegulatoryPenaltyLoader(config_path=temp_path)
 
-            # ✅ Deve ter usado fallback
             self.assertIn("fallback", loader.metadata.get("version", ""))
             self.assertGreater(len(loader.penalties), 0)
 
-            # ✅ Deve ter as penalidades padrão
             self.assertIn("eu_ai_act_prohibited_practices", loader.penalties)
             self.assertIn("gdpr_art_83_5_violations", loader.penalties)
         finally:
@@ -152,7 +150,7 @@ class TestApplicablePenalties(unittest.TestCase):
 
     def test_pii_leakage_triggers_gdpr(self):
         """PII leakage should trigger GDPR Art. 83 (€20M)."""
-        # ✅ FIX: Use keywords que EXISTEM
+
         issues = ["Model inversion attack leaked PII leakage of personal data"]
         classification = self.classifier.classify(issues)
         applicable = self.loader.get_applicable_penalties(classification)
@@ -162,7 +160,7 @@ class TestApplicablePenalties(unittest.TestCase):
 
         penalty = gdpr[0]
         self.assertEqual(penalty["max_penalty"], 20000000)
-        # ✅ FIX: Verifica qualquer uma das keywords
+
         self.assertTrue(
             any(kw in ["pii leakage", "model inversion"] for kw in penalty["triggered_by"])
         )
@@ -262,7 +260,6 @@ class TestEnforcementDecisions(unittest.TestCase):
 
     def test_high_risk_escalates(self):
         """High-risk violations should escalate to human review."""
-        # ✅ FIX: Use keyword que EXISTE
         task = Task(
             title="Loan approval model",
             description="System uses proxy discrimination based on zip code to predict loan default risk"
@@ -304,24 +301,20 @@ class TestEnforcementDecisions(unittest.TestCase):
         )
         decision = self.engine.enforce(task, self.system)
 
-        # ✅ Deve ser resposta crítica (BLOCKED ou ESCALATE)
         self.assertIn(
             decision.outcome,
             [Outcome.BLOCKED, Outcome.ESCALATE],
             f"Credential exposure must trigger critical response, got {decision.outcome}"
         )
 
-        # ✅ Deve detectar MISUSE domain
         self.assertIn("MISUSE", decision.detected_threats)
 
-        # ✅ Deve ter risco alto (≥7.0)
         self.assertGreaterEqual(
             decision.risk_score,
             7.0,
             f"Credential exposure should be HIGH risk, got {decision.risk_score}"
         )
 
-        # ✅ Deve ter recomendações (qualquer uma é aceitável para ESCALATE)
         self.assertGreater(len(decision.recommendations), 0)
 
 

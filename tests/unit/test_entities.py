@@ -1,6 +1,7 @@
-# tests/unit/test_entities.py (VERSÃO FINAL COMPLETA)
+# tests/unit/test_entities.py (FINAL COMPLETE VERSION)
+
 """
-Testes Unitários - Domain Entities
+Unit Tests - Domain Entities
 
 ISO 42001 6.1 (Risk Assessment Logic)
 
@@ -16,7 +17,7 @@ from src.domain.enums import AIRole, AISector, EUComplianceRisk, ArtifactType
 @pytest.mark.skip(reason="Validation not implemented in v0.9.0 - planned for v0.9.5")
 def test_high_risk_system_requires_logging():
     """
-    Testa que sistemas de alto risco requerem logging
+    Test that high-risk systems require logging
 
     Compliance: EU AI Act Art. 12
 
@@ -31,7 +32,7 @@ def test_high_risk_system_requires_logging():
             role=AIRole.DEPLOYER,
             sector=AISector.BANKING,
             risk_classification=EUComplianceRisk.HIGH,
-            logging_capabilities=False  # Violação!
+            logging_capabilities=False  # Violation!
         )
 
     assert "logging_capabilities=True" in str(exc_info.value)
@@ -41,7 +42,7 @@ def test_high_risk_system_requires_logging():
 @pytest.mark.skip(reason="Validation not implemented in v0.9.0 - planned for v0.9.5")
 def test_high_risk_critical_sector_requires_eu_registration():
     """
-    Testa que setores críticos de alto risco requerem registro EU
+    Test that critical high-risk sectors require EU registration
 
     Compliance: EU AI Act Art. 71
 
@@ -56,7 +57,7 @@ def test_high_risk_critical_sector_requires_eu_registration():
             sector=AISector.BIOMETRIC,
             risk_classification=EUComplianceRisk.HIGH,
             logging_capabilities=True,
-            eu_database_registration_id=None  # Violação!
+            eu_database_registration_id=None  # Violation!
         )
 
     assert "eu_database_registration_id" in str(exc_info.value)
@@ -66,7 +67,7 @@ def test_high_risk_critical_sector_requires_eu_registration():
 @pytest.mark.skip(reason="Validation not implemented in v0.9.0 - planned for v0.9.5")
 def test_systemic_gpai_requires_high_flops():
     """
-    Testa classificação de GPAI sistêmico
+    Test systemic GPAI classification
 
     Compliance: EU AI Act Art. 51
 
@@ -90,7 +91,7 @@ def test_systemic_gpai_requires_high_flops():
 
 def test_task_creation_with_defaults():
     """
-    Testa criação de Task com valores default
+    Test Task creation with default values
     """
     task = Task(title="Generate code for API")
 
@@ -101,7 +102,7 @@ def test_task_creation_with_defaults():
 
 def test_valid_uuid_v4_accepted():
     """
-    Testa que UUIDs v4 válidos são aceitos
+    Test that valid UUID v4 values are accepted
     """
     valid_uuid = "550e8400-e29b-41d4-a716-446655440000"
 

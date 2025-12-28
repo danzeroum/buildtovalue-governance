@@ -1,14 +1,16 @@
 """
 Authentication and Authorization (JWT + RBAC)
 
-Implementa:
+Implements:
 - ISO 42001 B.4.6 (Human Resources - Access Control)
 - JWT tokens with short expiration
 - Role-Based Access Control (4 roles)
+
+✅ UPDATED: Fixed datetime.utcnow() deprecation (Python 3.12+)
 """
 
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC  # ✅ ADDED UTC
 from typing import List
 from fastapi import HTTPException, Security, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -18,7 +20,7 @@ import logging
 
 logger = logging.getLogger("btv.auth")
 
-# Configuração JWT
+# JWT Configuration
 SECRET_KEY = os.getenv("JWT_SECRET", "super-secret-key-change-me-in-prod")
 ALGORITHM = "HS256"
 DEFAULT_EXPIRATION_MINUTES = 30
@@ -33,13 +35,13 @@ security = HTTPBearer()
 
 class TokenData(BaseModel):
     """
-    Dados extraídos do JWT token
+    Data extracted from JWT token
 
     Attributes:
-        tenant_id: UUID do tenant (para isolamento multi-tenant)
-        user_id: ID do usuário
-        role: Role RBAC (admin, dev, auditor, app)
-        exp: Timestamp de expiração
+        tenant_id: Tenant UUID (for multi-tenant isolation)
+        user_id: User ID
+        role: RBAC role (admin, dev, auditor, app)
+        exp: Expiration timestamp
     """
     tenant_id: str
     user_id: str
@@ -48,15 +50,15 @@ class TokenData(BaseModel):
 
 
 def create_access_token(
-        data: dict,
-        expires_delta: timedelta = timedelta(minutes=DEFAULT_EXPIRATION_MINUTES)
+    data: dict,
+    expires_delta: timedelta = timedelta(minutes=DEFAULT_EXPIRATION_MINUTES)
 ) -> str:
     """
-    Cria JWT access token
+    Create JWT access token
 
     Args:
-        data: Payload do token (tenant_id, user_id, role)
-        expires_delta: Tempo até expiração
+        data: Token payload (tenant_id, user_id, role)
+        expires_delta: Time until expiration
 
     Returns:
         JWT token string
@@ -69,7 +71,7 @@ def create_access_token(
         ... })
     """
     to_encode = data.copy()
-    expire = datetime.utcnow() + expires_delta
+    expire = datetime.now(UTC) + expires_delta  # ✅ FIXED: was datetime.utcnow()
     to_encode.update({"exp": expire})
 
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
@@ -83,30 +85,30 @@ def create_access_token(
 
 
 async def verify_jwt_token(
-        credentials: HTTPAuthorizationCredentials = Security(security)
+    credentials: HTTPAuthorizationCredentials = Security(security)
 ) -> TokenData:
     """
-    Verifica e decodifica JWT token
+    Verify and decode JWT token
 
     Args:
-        credentials: Bearer token do header Authorization
+        credentials: Bearer token from Authorization header
 
     Returns:
-        TokenData com claims validados
+        TokenData with validated claims
 
     Raises:
-        HTTPException 401: Token inválido, expirado ou claims ausentes
+        HTTPException 401: Invalid, expired token or missing claims
 
     Security:
-        Previne Authentication Bypass via claim validation
+        Prevents Authentication Bypass via claim validation
     """
     token = credentials.credentials
 
     try:
-        # Decodifica token
+        # Decode token
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
 
-        # CRITICAL: Validação de Claims Obrigatórios
+        # CRITICAL: Required Claims Validation
         required_claims = ["tenant_id", "user_id", "role", "exp"]
         missing_claims = [c for c in required_claims if c not in payload]
 
@@ -116,7 +118,7 @@ async def verify_jwt_token(
             )
             raise HTTPException(
                 status_code=401,
-                detail=f"Token inválido: claims ausentes ({', '.join(missing_claims)})"
+                detail=f"Invalid token: missing claims ({', '.join(missing_claims)})"
             )
 
         return TokenData(**payload)
@@ -125,32 +127,33 @@ async def verify_jwt_token(
         logger.warning(f"JWT validation failed: {e}")
         raise HTTPException(
             status_code=401,
-            detail="Token inválido ou expirado"
+            detail="Invalid or expired token"
         )
 
 
 def require_role(allowed_roles: List[str]):
     """
-    Decorator para RBAC (Role-Based Access Control)
+    Decorator for RBAC (Role-Based Access Control)
 
     Args:
-        allowed_roles: Lista de roles permitidas (admin, dev, auditor, app)
+        allowed_roles: List of allowed roles (admin, dev, auditor, app)
 
     Returns:
-        Dependency que valida role do token
+        Dependency that validates token role
 
     Example:
         @app.post("/admin-only")
         async def admin_endpoint(
-        ... ):
-        ...     token: TokenData = Depends(require_role(["admin"]))
-        ...     return {"message": "Admin access granted"}
+            token: TokenData = Depends(require_role(["admin"]))
+        ):
+            return {"message": "Admin access granted"}
 
     Security:
-        Previne Privilege Escalation
-        Compliance: ISO 42001 B.4.6 (Access Control)
-    """
+        Prevents Privilege Escalation
 
+    Compliance:
+        ISO 42001 B.4.6 (Access Control)
+    """
     def dependency(token: TokenData = Depends(verify_jwt_token)):
         if token.role not in allowed_roles:
             logger.warning(
@@ -159,8 +162,8 @@ def require_role(allowed_roles: List[str]):
             )
             raise HTTPException(
                 status_code=403,
-                detail=f"Acesso negado: role '{token.role}' não autorizada. "
-                       f"Roles permitidas: {', '.join(allowed_roles)}"
+                detail=f"Access denied: role '{token.role}' not authorized. "
+                       f"Allowed roles: {', '.join(allowed_roles)}"
             )
         return token
 

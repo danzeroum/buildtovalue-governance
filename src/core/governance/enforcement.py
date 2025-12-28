@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-BuildToValue v0.9.5.1 - Enforcement Engine with Regulatory Impact Assessment
+BuildToValue 0.9.0 - Enforcement Engine with Regulatory Impact Assessment
 Bug Fix Release: Shadow AI blocking + executive summary location fix
 """
 import os
@@ -25,7 +25,7 @@ class RegulatoryPenaltyLoader:
     """
     Loads and manages regulatory penalty schedules from YAML configuration.
 
-    v0.9.5.1 Fix: _generate_executive_summary moved here from EnforcementEngine
+    0.9.0 Fix: _generate_executive_summary moved here from EnforcementEngine
     """
 
     DEFAULT_CONFIG_PATH = "src/config/regulatory_penalties.yaml"
@@ -154,7 +154,7 @@ class RegulatoryPenaltyLoader:
 
     def _set_fallback_metadata(self) -> None:
         self.metadata = {
-            "version": "0.9.5-fallback",
+            "version": "0.9.0-fallback",
             "last_updated": "2025-12-27T16:05:00Z",
             "legal_review_date": "2025-12-15",
             "source": "Embedded fallback (YAML not available)"
@@ -380,7 +380,7 @@ class EnforcementEngine:
     """
     Enforces governance policies with regulatory impact assessment.
 
-    v0.9.5.1 Fix: Shadow AI now forces BLOCKED outcome
+    0.9.0 Fix: Shadow AI now forces BLOCKED outcome
     """
 
     THRESHOLD_CRITICAL = 9.0
@@ -396,7 +396,7 @@ class EnforcementEngine:
         self.classifier = ThreatVectorClassifier(use_simplified=use_simplified_taxonomy)
         self.penalty_loader = RegulatoryPenaltyLoader(penalty_config_path)
         logger.info(
-            f"EnforcementEngine v0.9.5.1 initialized. "
+            f"EnforcementEngine 0.9.0 initialized. "
             f"Loaded {len(self.penalty_loader.penalties)} penalty schedules."
         )
 
@@ -477,11 +477,11 @@ class EnforcementEngine:
         """
         Apply controls and calculate residual risk.
 
-        v0.9.5.3 FIX: Disable risk reduction for CRITICAL threats
+        0.9.0 FIX: Disable risk reduction for CRITICAL threats
         - Baseline risk ≥ 9.0 → No reduction (already critical)
         - Critical sub-threats → No reduction (prohibited practices)
 
-        v0.9.5 Basic implementation (foundation for v1.0 ROI tracking)
+        0.9.0 Basic implementation (foundation for v1.0 ROI tracking)
         v1.0 Will track control effectiveness and cost avoidance
 
         Args:
@@ -496,7 +496,7 @@ class EnforcementEngine:
         risk_reduction_factor = 1.0  # No reduction by default
 
         # ========================================================================
-        # v0.9.5.3 FIX: CRITICAL THREATS → NO RISK REDUCTION
+        # 0.9.0 FIX: CRITICAL THREATS → NO RISK REDUCTION
         # ========================================================================
 
         # Rule 1: Baseline ≥ 9.0 = Already CRITICAL → No reduction
@@ -534,7 +534,7 @@ class EnforcementEngine:
             controls.append("PII Detection")
             risk_reduction_factor *= 0.6  # 40% reduction
 
-        # CONTROL 3: Shadow AI Credential Blocker (v0.9.5 NEW)
+        # CONTROL 3: Shadow AI Credential Blocker (0.9.0 NEW)
         if classification.sub_threat_type and "shadow_ai" in classification.sub_threat_type:
             controls.append("Shadow AI Credential Blocker")
             risk_reduction_factor *= 0.3  # 70% reduction (CRITICAL control)
@@ -725,9 +725,9 @@ class EnforcementEngine:
 
 
 # Version metadata
-ENFORCEMENT_VERSION = "0.9.5.1"
+ENFORCEMENT_VERSION = "0.9.0"
 SCIENTIFIC_BASIS = """
-v0.9.5.1 (2025-12-27 21:00) - Bug Fix Release:
+0.9.0 (2025-12-27 21:00) - Bug Fix Release:
 
 BUG FIXES:
 ✅ Moved _generate_executive_summary to RegulatoryPenaltyLoader (correct location)
@@ -735,7 +735,7 @@ BUG FIXES:
 ✅ Fixed datetime.utcnow() deprecation (now uses timezone.utc)
 ✅ Standardized key names (total_max_eur, total_min_eur)
 
-v0.9.5 (2025-12-27) - Regulatory Impact Assessment:
+0.9.0 (2025-12-27) - Regulatory Impact Assessment:
 
 MAJOR ENHANCEMENTS:
 ✅ Financial exposure calculation (EU AI Act, GDPR, ECOA)

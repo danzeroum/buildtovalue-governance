@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-BuildToValue v0.9.5.4 - Threat Vector Classifier (Multi-Sector Edition)
+BuildToValue 0.9.0 - Threat Vector Classifier (Multi-Sector Edition)
 
 Scientific Basis: Huwyler (2025) - arXiv:2511.21901v1 [cs.CR]
 Validated against 133 documented AI incidents (2019-2025)
 
-Release Notes v0.9.5.4 (Multi-Sector Expansion):
+Release Notes 0.9.0 (Multi-Sector Expansion):
 - 🌐 MULTI-SECTOR: +63 keywords for Healthcare, HR, Gov, Infrastructure, Education
 - 🛡️ SECURITY: Maintains 100% Prevention Rate (Fintech validated)
 - 🎯 PRECISION: Safe Pattern whitelisting maintained
-- 🚀 PRODUCTION-READY: Backward compatible with v0.9.5.3
+- 🚀 PRODUCTION-READY: Backward compatible with 0.9.0
 
 Major Changes:
 - Expanded MISUSE: Infrastructure safety, automated decisions (+18)
@@ -57,7 +57,7 @@ PREVALENCE_WEIGHTS = {
 # ============================================================================
 
 SAFE_PATTERNS = {
-    # === FINTECH OPERATIONS (v0.9.5.3) ===
+    # === FINTECH OPERATIONS (0.9.0) ===
     # Financial Operations (Legitimate use of "credit" terms)
     "credit score": ["credit card", "credit"],
     "calculate credit": ["credit card", "credit"],
@@ -134,7 +134,7 @@ SAFE_PATTERNS = {
 }
 
 # ============================================================================
-# THREAT PATTERNS - v0.9.5.4 (Complete 9-Domain + Multi-Sector Coverage)
+# THREAT PATTERNS - 0.9.0 (Complete 9-Domain + Multi-Sector Coverage)
 # ============================================================================
 
 THREAT_PATTERNS = {
@@ -175,7 +175,7 @@ THREAT_PATTERNS = {
             "bypass kyc", "bypass verification", "synthetic identities",
             "fake identities", "create synthetic",
 
-            # === SECTOR-SPECIFIC MISUSE (v0.9.5.4) ===
+            # === SECTOR-SPECIFIC MISUSE (0.9.0) ===
             # Infrastructure Safety
             "ignore safety", "ignore safety protocol", "bypass redundancy",
             "disable failsafe", "override limit", "shutdown substation",
@@ -233,7 +233,7 @@ THREAT_PATTERNS = {
             # LOW
             "ignore": 0.5,
 
-            # === SECTOR-SPECIFIC WEIGHTS (v0.9.5.4) ===
+            # === SECTOR-SPECIFIC WEIGHTS (0.9.0) ===
             # Infrastructure (CRITICAL)
             "ignore safety": 10.0,
             "ignore safety protocol": 10.0,
@@ -317,7 +317,7 @@ THREAT_PATTERNS = {
             "polygraph", "lie detection", "truthfulness detection",
             "detect lying", "evaluate truthfulness",
 
-            # === SECTOR-SPECIFIC PRIVACY (v0.9.5.4) ===
+            # === SECTOR-SPECIFIC PRIVACY (0.9.0) ===
             # Healthcare
             "medical history", "patient medical history", "genetic data",
             "family history", "health condition", "diagnosis",
@@ -371,7 +371,7 @@ THREAT_PATTERNS = {
             # LOW
             "email": 0.5,
 
-            # === SECTOR-SPECIFIC WEIGHTS (v0.9.5.4) ===
+            # === SECTOR-SPECIFIC WEIGHTS (0.9.0) ===
             # Healthcare (HIGH - GDPR Art. 9 Special Category)
             "genetic data": 8.0,
             "medical history": 6.0,
@@ -458,7 +458,7 @@ THREAT_PATTERNS = {
             # Actions
             "prioritize", "exclude", "favor", "reject based on",
 
-            # === SECTOR-SPECIFIC BIASES (v0.9.5.4) ===
+            # === SECTOR-SPECIFIC BIASES (0.9.0) ===
             # Healthcare Age/Gender Discrimination
             "penalize patients", "downrank patients", "deprioritize patients",
             "waiting list", "organ transplant", "treatment priority",
@@ -526,7 +526,7 @@ THREAT_PATTERNS = {
             "gender": 1.0,
             "names": 1.0,  # ✅ Very low (too generic)
 
-            # === SECTOR-SPECIFIC WEIGHTS (v0.9.5.4) ===
+            # === SECTOR-SPECIFIC WEIGHTS (0.9.0) ===
             # Healthcare (HIGH)
             "penalize patients": 7.0,
             "downrank patients": 7.0,
@@ -762,7 +762,7 @@ class ThreatVectorClassifier:
     """
     Classifies AI threats using Huwyler's Taxonomy (arXiv:2511.21901v1).
 
-    v0.9.5.4 (Multi-Sector Edition):
+    0.9.0 (Multi-Sector Edition):
     - 100% Prevention Rate (Fintech validated)
     - 95%+ Precision (Safe Pattern whitelisting)
     - Multi-sector support (Healthcare, HR, Gov, Infrastructure, Education)
@@ -792,7 +792,7 @@ class ThreatVectorClassifier:
         """
         Classify threats with Safe Pattern whitelisting.
 
-        v0.9.5.4 Algorithm:
+        0.9.0 Algorithm:
         1. Check Safe Patterns (whitelist context)
         2. Keyword matching (weighted, excluding whitelisted)
         3. Regex matching (2.0 points each)
@@ -1055,7 +1055,7 @@ class ThreatVectorClassifier:
 # VERSION METADATA
 # ============================================================================
 
-CLASSIFIER_VERSION = "0.9.5.4"
+CLASSIFIER_VERSION = "0.9.0"
 
 SCIENTIFIC_BASIS = """
 v0.9.5.5 (2025-12-28 02:24) - Healthcare Safe Patterns Fix:
@@ -1076,7 +1076,7 @@ v0.9.5.5 (2025-12-28 02:24) - Healthcare Safe Patterns Fix:
 
 🔧 TECHNICAL IMPROVEMENTS:
 - Fixes Healthcare false positives (11 → 0 expected)
-- Maintains multi-sector keyword expansion from v0.9.5.4
+- Maintains multi-sector keyword expansion from 0.9.0
 - Precision restored: 84.3% → 95%+ (target)
 - Healthcare Prevention: 10% → 60-70% (expected)
 

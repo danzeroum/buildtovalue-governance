@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-BuildToValue v0.9.5.3 - Sector-Specific Safe Patterns
+BuildToValue 0.9.0 - Sector-Specific Safe Patterns
 
 Context-aware whitelisting for legitimate operations across regulated sectors.
 Prevents false positives while maintaining 100% threat detection.
@@ -207,7 +207,7 @@ EDUCATION_SAFE_PATTERNS = {
 # ============================================================================
 
 FINTECH_SAFE_PATTERNS = {
-    # From v0.9.5.3 Gold Master (already implemented)
+    # From 0.9.0 Gold Master (already implemented)
     "credit score": ["credit card", "credit"],
     "calculate credit": ["credit card", "credit"],
     "check loan eligibility": ["deny loan"],
@@ -320,10 +320,10 @@ class HealthcareSimulation(BaseSectorSimulation):
 # VERSION METADATA
 # ============================================================================
 
-SECTOR_PATTERNS_VERSION = "0.9.5.3"
+SECTOR_PATTERNS_VERSION = "0.9.0"
 
 SECTOR_PATTERNS_BASIS = """
-v0.9.5.3 (2025-12-28 01:14) - Sector-Specific Safe Patterns:
+0.9.0 (2025-12-28 01:14) - Sector-Specific Safe Patterns:
 
 ✅ SECTORS COVERED:
 - Healthcare: Medical operations, triage, patient data

@@ -1,11 +1,13 @@
-# tests/conftest.py (CORREÇÃO DO CLEANUP)
+# tests/conftest.py (CLEANUP FIX)
+
 """
-Pytest fixtures e configurações globais
+Pytest fixtures and global configurations
 """
+
 import sys
 from pathlib import Path
 
-# ✅ Adiciona raiz do projeto ao sys.path para resolver imports de 'src'
+# ✅ Add project root to sys.path to resolve 'src' imports
 root_dir = Path(__file__).parent.parent
 if str(root_dir) not in sys.path:
     sys.path.insert(0, str(root_dir))
@@ -28,42 +30,42 @@ from src.domain.enums import AIRole, AISector, EUComplianceRisk
 
 @pytest.fixture
 def test_db():
-    """Fixture para banco de dados de teste"""
+    """Fixture for test database"""
     db_path = Path("./test_data/test_registry.db")
     db_path.parent.mkdir(exist_ok=True)
 
     registry = SystemRegistry(f"sqlite:///{db_path}")
-
     yield registry
 
-    # ✅ CORREÇÃO: Cleanup mais robusto para Windows
+    # ✅ FIX: More robust cleanup for Windows
     try:
-        # Fechar conexões explicitamente
+        # Explicitly close connections
         if hasattr(registry, 'engine'):
             registry.engine.dispose()
 
-        # Forçar garbage collection para liberar handles
+        # Force garbage collection to release handles
         del registry
         gc.collect()
 
-        # Aguardar um momento para o Windows liberar o arquivo
+        # Wait a moment for Windows to release the file
         import time
         time.sleep(0.1)
 
-        # Tentar remover (se falhar, não é crítico)
+        # Try to remove (if it fails, not critical)
         if db_path.exists():
             db_path.unlink()
+
     except PermissionError:
-        # Ignorar erro de permissão no Windows (não é crítico para testes)
+        # Ignore permission error on Windows (not critical for tests)
         pass
     except Exception as e:
-        # Log outros erros mas não falhar o teste
+        # Log other errors but don't fail the test
         print(f"Warning: Cleanup error: {e}")
 
 
 @pytest.fixture
 def admin_token():
-    """Fixture para token de admin"""
+    """Fixture for admin token"""
     return create_access_token(
         data={
             "tenant_id": "test-tenant-550e8400-e29b-41d4-a716-446655440000",
@@ -76,7 +78,7 @@ def admin_token():
 
 @pytest.fixture
 def dev_token():
-    """Fixture para token de desenvolvedor"""
+    """Fixture for developer token"""
     return create_access_token(
         data={
             "tenant_id": "test-tenant-550e8400-e29b-41d4-a716-446655440000",
@@ -89,7 +91,7 @@ def dev_token():
 
 @pytest.fixture
 def malicious_token():
-    """Fixture para token de outro tenant (para testar BOLA)"""
+    """Fixture for another tenant's token (to test BOLA)"""
     return create_access_token(
         data={
             "tenant_id": "malicious-tenant-123e4567-e89b-12d3-a456-426614174000",
@@ -102,7 +104,7 @@ def malicious_token():
 
 @pytest.fixture
 def sample_system():
-    """Fixture para sistema de IA de teste"""
+    """Fixture for test AI system"""
     return AISystem(
         id="test-system-001",
         tenant_id="test-tenant-550e8400-e29b-41d4-a716-446655440000",
@@ -118,7 +120,7 @@ def sample_system():
 
 @pytest.fixture
 def sample_high_risk_system():
-    """Fixture para sistema de alto risco"""
+    """Fixture for high-risk system"""
     return AISystem(
         id="high-risk-system",
         tenant_id="test-tenant-550e8400-e29b-41d4-a716-446655440000",

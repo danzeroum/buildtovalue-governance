@@ -41,7 +41,7 @@ class FintechSimulation:
     """
     Simulates fintech AI requests with adversarial attacks.
 
-    v0.9.5.1 Changes:
+
     - Fixed Outcome enum handling (APPROVED not ALLOWED)
     - Added CONDITIONAL state tracking
     - Financial impact reporting (€ fines prevented)

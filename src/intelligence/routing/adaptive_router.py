@@ -1,7 +1,7 @@
 """
-Adaptive Risk Router com 3 Agentes Especializados
+Adaptive Risk Router with 3 Specialized Agents
 
-Implementa:
+Implements:
 - ISO 42001 6.1.2 (AI Risk Assessment)
 - EU AI Act Art. 9 (Risk Management System)
 - Multi-dimensional risk scoring (technical, regulatory, ethical)
@@ -18,25 +18,25 @@ logger = logging.getLogger("btv.router")
 
 class AdaptiveRiskRouter:
     """
-    Router Adaptativo de Risco com Agentes Especializados
+    Adaptive Risk Router with Specialized Agents
 
-    Arquitetura Multi-Agent:
-    1. Technical Agent - Avalia complexidade técnica (FLOPs, logging)
-    2. Regulatory Agent - Verifica conformidade (EU AI Act, ISO 42001)
-    3. Ethical Agent - Analisa impacto societal (transparência, fairness)
+    Multi-Agent Architecture:
+    1. Technical Agent - Assesses technical complexity (FLOPs, logging)
+    2. Regulatory Agent - Verifies compliance (EU AI Act, ISO 42001)
+    3. Ethical Agent - Analyzes societal impact (transparency, fairness)
 
     Risk Score: 0-10 (weighted average)
     """
 
     def __init__(self):
-        """Inicializa router com pesos dos agentes"""
+        """Initialize router with agent weights"""
         self.risk_weights = {
             "technical": 0.3,
-            "regulatory": 0.4,  # Maior peso (compliance crítica)
+            "regulatory": 0.4,  # Higher weight (critical compliance)
             "ethical": 0.3
         }
 
-        # Keywords suspeitas para análise ética
+        # Suspicious keywords for ethical analysis
         self.suspicious_keywords = [
             "discriminar", "manipular", "enganar", "social scoring",
             "subliminar", "vulnerabilidade", "criança", "emoção",
@@ -48,14 +48,14 @@ class AdaptiveRiskRouter:
 
     def assess_risk(self, task: Task, system: AISystem) -> Dict:
         """
-        Avalia risco agregado da tarefa usando 3 agentes
+        Assess aggregated task risk using 3 agents
 
         Args:
-            task: Tarefa sendo executada
-            system: Sistema de IA executor
+            task: Task being executed
+            system: Executing AI system
 
         Returns:
-            Dict com risk_score (0-10) e issues detectadas
+            Dict with risk_score (0-10) and detected issues
 
         Compliance:
             ISO 42001 6.1.2 (AI Risk Assessment)
@@ -63,27 +63,27 @@ class AdaptiveRiskRouter:
         issues = []
         scores = {}
 
-        # Agente 1: Análise Técnica
+        # Agent 1: Technical Analysis
         scores["technical"] = self._assess_technical_risk(task, system, issues)
 
-        # Agente 2: Análise Regulatória (EU AI Act + ISO 42001)
+        # Agent 2: Regulatory Analysis (EU AI Act + ISO 42001)
         scores["regulatory"] = self._assess_regulatory_risk(task, system, issues)
 
-        # Agente 3: Análise Ética (Art. 69 EU AI Act)
+        # Agent 3: Ethical Analysis (Art. 69 EU AI Act)
         scores["ethical"] = self._assess_ethical_risk(task, system, issues)
 
-        # Score agregado (ponderado)
+        # Aggregated score (weighted)
         risk_score = sum(
             scores[agent] * self.risk_weights[agent]
             for agent in scores
         )
 
-        # Penalização por histórico (se houver flags)
+        # Penalty for history (if flags exist)
         if system.high_risk_flags:
             penalty = min(2.0, len(system.high_risk_flags) * 0.5)
             risk_score += penalty
             issues.append(
-                f"⚠️ Sistema possui {len(system.high_risk_flags)} flags de alto risco"
+                f"⚠️ System has {len(system.high_risk_flags)} high-risk flags"
             )
 
         logger.info(
@@ -106,43 +106,43 @@ class AdaptiveRiskRouter:
             issues: List[str]
     ) -> float:
         """
-        Agente 1: Avalia risco técnico
+        Agent 1: Assess technical risk
 
-        Fatores:
-        - FLOPs de treinamento (Art. 51 EU AI Act)
-        - Capacidades de logging (Art. 12 EU AI Act)
-        - Complexidade da tarefa
+        Factors:
+        - Training FLOPs (Art. 51 EU AI Act)
+        - Logging capabilities (Art. 12 EU AI Act)
+        - Task complexity
 
         Returns:
             Risk score (0-10)
         """
         risk = 2.0  # Base risk
 
-        # FLOPs altíssimos = maior risco (GPAI Sistêmico)
+        # Very high FLOPs = higher risk (Systemic GPAI)
         if system.training_compute_flops:
             if system.training_compute_flops > 1e25:
                 risk += 3.0
                 issues.append(
-                    "🔴 Sistema GPAI sistêmico (FLOPs > 10^25) - Art. 51 EU AI Act"
+                    "🔴 Systemic GPAI system (FLOPs > 10^25) - Art. 51 EU AI Act"
                 )
             elif system.training_compute_flops > 1e24:
                 risk += 2.0
                 issues.append(
-                    "🟡 Sistema GPAI de alto compute (FLOPs > 10^24)"
+                    "🟡 High-compute GPAI system (FLOPs > 10^24)"
                 )
 
-        # Sem logging = maior risco (Art. 12 ISO 42001)
+        # No logging = higher risk (Art. 12 ISO 42001)
         if not system.logging_capabilities:
             risk += 1.5
             issues.append(
-                "⚠️ Sistema sem capacidade de logging - Violação Art. 12 ISO 42001"
+                "⚠️ System without logging capability - Art. 12 ISO 42001 violation"
             )
 
-        # Tamanho da tarefa (proxy de complexidade)
+        # Task size (complexity proxy)
         task_length = len(task.title) + len(task.description)
         if task_length > 1000:
             risk += 0.5
-            issues.append("📝 Tarefa complexa detectada (> 1000 chars)")
+            issues.append("📝 Complex task detected (> 1000 chars)")
 
         return min(10.0, risk)
 
@@ -153,20 +153,20 @@ class AdaptiveRiskRouter:
             issues: List[str]
     ) -> float:
         """
-        Agente 2: Avalia conformidade regulatória
+        Agent 2: Assess regulatory compliance
 
         Checks:
-        - Setor de aplicação (Anexo III EU AI Act)
-        - Classificação de risco (Art. 6)
-        - Jurisdição (GDPR Art. 44-50)
-        - Registro EU Database (Art. 71)
+        - Application sector (Annex III EU AI Act)
+        - Risk classification (Art. 6)
+        - Jurisdiction (GDPR Art. 44-50)
+        - EU Database registration (Art. 71)
 
         Returns:
             Risk score (0-10)
         """
         risk = 1.0  # Base risk
 
-        # Mapeamento setor -> risco base
+        # Sector -> base risk mapping
         high_risk_sectors = [
             AISector.BIOMETRIC,
             AISector.LAW_ENFORCEMENT,
@@ -179,40 +179,40 @@ class AdaptiveRiskRouter:
         if system.sector in high_risk_sectors:
             risk += 4.0
             issues.append(
-                f"🔴 Setor de ALTO RISCO: {system.sector.value} (Anexo III EU AI Act)"
+                f"🔴 HIGH-RISK sector: {system.sector.value} (Annex III EU AI Act)"
             )
 
-        # Classificação de risco do sistema
-        if system.risk_classification == EUComplianceRisk.UNACCEPTABLE:
+        # System risk classification
+        if system.risk_classification == EUComplianceRisk.PROHIBITED:
             risk = 10.0
             issues.append(
-                "🚨 PRÁTICA PROIBIDA detectada - Art. 5 EU AI Act - BLOQUEIO IMEDIATO"
+                "🚨 PROHIBITED PRACTICE detected - Art. 5 EU AI Act - IMMEDIATE BLOCK"
             )
         elif system.risk_classification == EUComplianceRisk.HIGH:
             risk += 3.0
             issues.append(
-                "🔴 Sistema classificado como ALTO RISCO (Art. 6 EU AI Act)"
+                "🔴 System classified as HIGH RISK (Art. 6 EU AI Act)"
             )
         elif system.risk_classification == EUComplianceRisk.SYSTEMIC_GPAI:
             risk += 3.5
             issues.append(
-                "🔴 Sistema GPAI com risco sistêmico (Art. 51 EU AI Act)"
+                "🔴 GPAI system with systemic risk (Art. 51 EU AI Act)"
             )
 
-        # Jurisdição não-EU = mais risco (GDPR Art. 44-50)
+        # Non-EU jurisdiction = higher risk (GDPR Art. 44-50)
         if system.jurisdiction != "EU":
             risk += 1.0
             issues.append(
-                f"⚠️ Sistema em jurisdição não-EU: {system.jurisdiction} "
-                f"(GDPR Art. 44 - Transferências Internacionais)"
+                f"⚠️ System in non-EU jurisdiction: {system.jurisdiction} "
+                f"(GDPR Art. 44 - International Transfers)"
             )
 
-        # Alto risco sem registro EU = violação
+        # High risk without EU registration = violation
         if (system.risk_classification == EUComplianceRisk.HIGH and
                 not system.eu_database_registration_id):
             risk += 2.0
             issues.append(
-                "🔴 Sistema de alto risco SEM registro na EU Database (Art. 71)"
+                "🔴 High-risk system WITHOUT EU Database registration (Art. 71)"
             )
 
         return min(10.0, risk)
@@ -224,19 +224,19 @@ class AdaptiveRiskRouter:
             issues: List[str]
     ) -> float:
         """
-        Agente 3: Avalia risco ético e societal
+        Agent 3: Assess ethical and societal risk
 
         Checks:
-        - Keywords suspeitas no prompt
-        - Transparência (registro EU)
-        - Explicabilidade
+        - Suspicious keywords in prompt
+        - Transparency (EU registration)
+        - Explainability
 
         Returns:
             Risk score (0-10)
         """
         risk = 1.0  # Base risk
 
-        # Análise de keywords suspeitas
+        # Suspicious keywords analysis
         task_lower = (task.title + " " + task.description).lower()
         detected_keywords = []
 
@@ -247,24 +247,24 @@ class AdaptiveRiskRouter:
         if detected_keywords:
             risk += min(3.0, len(detected_keywords) * 1.5)
             issues.append(
-                f"⚠️ Termos suspeitos detectados no prompt: {', '.join(detected_keywords[:3])} "
-                f"(Possível violação Art. 5 EU AI Act)"
+                f"⚠️ Suspicious terms detected in prompt: {', '.join(detected_keywords[:3])} "
+                f"(Possible Art. 5 EU AI Act violation)"
             )
 
-        # Sistema sem ID da EU Database = menos transparência
+        # System without EU Database ID = less transparency
         if not system.eu_database_registration_id and system.risk_classification != EUComplianceRisk.MINIMAL:
             risk += 1.0
             issues.append(
-                "⚠️ Sistema não registrado na EU Database (Art. 71) - "
-                "Reduz transparência"
+                "⚠️ System not registered in EU Database (Art. 71) - "
+                "Reduces transparency"
             )
 
-        # Setores sensíveis (crianças, vulneráveis)
+        # Sensitive sectors (children, vulnerable)
         if system.sector in [AISector.EDUCATION, AISector.HEALTHCARE]:
             risk += 0.5
             issues.append(
-                f"ℹ️ Setor sensível: {system.sector.value} - "
-                f"Requer atenção especial a vulnerabilidades"
+                f"ℹ️ Sensitive sector: {system.sector.value} - "
+                f"Requires special attention to vulnerabilities"
             )
 
         return min(10.0, risk)

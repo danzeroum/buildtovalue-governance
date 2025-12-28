@@ -1,7 +1,7 @@
 """
 Compliance Memory RAG (Retrieval-Augmented Generation)
 
-Implementa:
+Implements:
 - ISO 42001 A.7.5 (Data Provenance)
 - ISO 42001 9.1 (Monitoring and Measurement)
 - Historical violation tracking
@@ -18,27 +18,27 @@ logger = logging.getLogger("btv.memory")
 
 class ComplianceMemoryRAG:
     """
-    Sistema RAG simplificado para compliance e auditoria
+    Simplified RAG system for compliance and auditing
 
     Features:
-    - Armazenamento de violações históricas
-    - Query de tarefas similares (text-based search)
-    - Analytics por tenant/período
+    - Historical violation storage
+    - Similar task queries (text-based search)
+    - Analytics by tenant/period
 
-    Future: Upgrade para vector embeddings (ChromaDB, Pinecone)
+    Future: Upgrade to vector embeddings (ChromaDB, Pinecone)
     """
 
     def __init__(self, memory_path: Path):
         """
-        Inicializa compliance memory
+        Initialize compliance memory
 
         Args:
-            memory_path: Diretório para armazenar memória
+            memory_path: Directory to store memory
         """
         self.memory_path = Path(memory_path)
         self.violations_file = self.memory_path / "violations.jsonl"
 
-        # Cria estrutura de diretórios
+        # Create directory structure
         self.memory_path.mkdir(parents=True, exist_ok=True)
         self.violations_file.touch(exist_ok=True)
 
@@ -52,20 +52,20 @@ class ComplianceMemoryRAG:
             reason: str
     ):
         """
-        Registra violação no histórico
+        Log violation to history
 
         Args:
-            task_title: Título da tarefa que violou
-            system_id: ID do sistema
-            risk: Score de risco
-            reason: Razão do bloqueio
+            task_title: Title of the violating task
+            system_id: System ID
+            risk: Risk score
+            reason: Reason for blocking
 
         Compliance:
             ISO 42001 9.1 (Monitoring and Measurement)
         """
         entry = {
             "timestamp": datetime.now().isoformat(),
-            "task_title": task_title[:500],  # Limita tamanho
+            "task_title": task_title[:500],  # Limit size
             "system_id": system_id,
             "risk_score": round(risk, 2),
             "reason": reason
@@ -81,18 +81,18 @@ class ComplianceMemoryRAG:
 
     def query_similar(self, task_title: str, limit: int = 5) -> List[Dict]:
         """
-        Busca violações similares (busca textual simples)
+        Search for similar violations (simple text search)
 
         Args:
-            task_title: Título da tarefa para buscar
-            limit: Número máximo de resultados
+            task_title: Task title to search for
+            limit: Maximum number of results
 
         Returns:
-            Lista de violações similares
+            List of similar violations
 
         Note:
-            Implementação atual usa busca por palavras-chave.
-            TODO: Upgrade para embeddings semânticos (sentence-transformers)
+            Current implementation uses keyword-based search.
+            TODO: Upgrade to semantic embeddings (sentence-transformers)
         """
         if not self.violations_file.exists():
             return []
@@ -106,18 +106,18 @@ class ComplianceMemoryRAG:
                 try:
                     entry = json.loads(line.strip())
 
-                    # Similaridade simples (palavras em comum)
+                    # Simple similarity (common words)
                     entry_words = set(entry["task_title"].lower().split())
                     common_words = task_words & entry_words
 
-                    if len(common_words) >= 2:  # Pelo menos 2 palavras em comum
+                    if len(common_words) >= 2:  # At least 2 words in common
                         entry["similarity"] = len(common_words) / max(len(task_words), 1)
                         results.append(entry)
 
                 except json.JSONDecodeError:
                     continue
 
-        # Ordena por similaridade (descendente)
+        # Sort by similarity (descending)
         results.sort(key=lambda x: x.get("similarity", 0), reverse=True)
 
         if results:
@@ -134,18 +134,18 @@ class ComplianceMemoryRAG:
             days: int = 30
     ) -> List[Dict]:
         """
-        Busca violações de um tenant em período específico
+        Retrieve violations for a tenant within a specific period
 
         Args:
-            tenant_id: ID do tenant
-            days: Número de dias para lookback
+            tenant_id: Tenant ID
+            days: Number of days to look back
 
         Returns:
-            Lista de violações do tenant
+            List of tenant violations
 
         Note:
-            Implementação atual retorna todas (sem filtro de tenant).
-            TODO: Adicionar tenant_id no violation log
+            Current implementation returns all (no tenant filter).
+            TODO: Add tenant_id to violation log
         """
         violations = []
 
@@ -163,10 +163,10 @@ class ComplianceMemoryRAG:
 
     def get_statistics(self) -> Dict:
         """
-        Retorna estatísticas de violações
+        Return violation statistics
 
         Returns:
-            Dict com métricas agregadas
+            Dict with aggregated metrics
         """
         violations = []
 
@@ -185,11 +185,11 @@ class ComplianceMemoryRAG:
                 "most_common_reason": None
             }
 
-        # Calcula estatísticas
+        # Calculate statistics
         total = len(violations)
         avg_risk = sum(v["risk_score"] for v in violations) / total
 
-        # Razão mais comum
+        # Most common reason
         reasons = [v["reason"] for v in violations]
         most_common = max(set(reasons), key=reasons.count) if reasons else None
 

@@ -15,7 +15,7 @@ from .enums import (
 )
 
 
-# --- Sub-entidades (Helpers) ---
+# --- Sub-entities (Helpers) ---
 @dataclass
 class ThirdPartyComponent:
     name: str
@@ -62,7 +62,7 @@ class AISystemTeamComposition:
     accessibility_expert_involved: bool
 
 
-# --- Entidades Principais ---
+# --- Main Entities ---
 
 @dataclass
 class Task:
@@ -79,10 +79,12 @@ class Task:
 @dataclass
 class AISystem:
     """
-    Entidade Unificada do Sistema de IA.
-    Contém campos Legacy (Registry) e Novos (NIST/Gateway).
+    Unified AI System Entity.
+
+    Contains Legacy (Registry) and New (NIST/Gateway) fields.
     """
-    # Identificação & Core
+
+    # Identification & Core
     id: str
     tenant_id: str
     name: str
@@ -92,7 +94,7 @@ class AISystem:
     sector: AISector = AISector.GENERAL
     risk_classification: EUComplianceRisk = EUComplianceRisk.MINIMAL
 
-    # Governança & Configuração
+    # Governance & Configuration
     is_sandbox_mode: bool = False
     logging_capabilities: bool = True
     jurisdiction: str = "EU"
@@ -115,14 +117,14 @@ class AISystem:
     aicm_controls_applicable: List[str] = field(default_factory=list)
     aicm_controls_implemented: List[str] = field(default_factory=list)
 
-    # Campos Opcionais Complexos
+    # Complex Optional Fields
     cost_benefit_analysis: Optional[AISystemCostBenefit] = None
     residual_risks: List[ResidualRiskDisclosure] = field(default_factory=list)
     social_impact: Optional[SocialImpactAssessment] = None
     team_composition: Optional[AISystemTeamComposition] = None
     policy_card_uri: Optional[str] = None
 
-    # Auditoria
+    # Audit
     created_at: datetime = field(default_factory=datetime.utcnow)
     updated_at: datetime = field(default_factory=datetime.utcnow)
     created_by: Optional[str] = None

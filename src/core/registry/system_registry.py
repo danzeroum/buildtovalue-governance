@@ -1,14 +1,14 @@
 """
-System Registry com Isolamento Multi-Tenant (BOLA Protection)
+System Registry with Multi-Tenant Isolation (BOLA Protection)
 
-Implementa:
+Implements:
 - SQL Injection Prevention (SQLAlchemy ORM)
 - BOLA/IDOR Protection (tenant_id validation)
 - ISO 42001 A.10.2 (Allocating Responsibilities)
 """
 
 from sqlalchemy import create_engine, Column, String, DateTime, JSON, Integer, Index
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 from typing import Optional, Dict
@@ -23,9 +23,9 @@ logger = logging.getLogger("btv.registry")
 
 class TenantModel(Base):
     """
-    Modelo de Tenant (Camada 2 - Empresa)
+    Tenant Model (Layer 2 - Organization)
 
-    Armazena políticas de governança específicas da organização
+    Stores organization-specific governance policies
     """
     __tablename__ = "tenants"
 
@@ -41,14 +41,14 @@ class TenantModel(Base):
 
 class AISystemModel(Base):
     """
-    Modelo de Sistema de IA (Camada 3 - Projeto)
+    AI System Model (Layer 3 - Project)
 
-    Implementa isolamento multi-tenant via tenant_id index
+    Implements multi-tenant isolation via tenant_id index
     """
     __tablename__ = "ai_systems"
 
     id = Column(String, primary_key=True)
-    tenant_id = Column(String, nullable=False, index=True)  # FK lógica + Index
+    tenant_id = Column(String, nullable=False, index=True)  # Logical FK + Index
     name = Column(String, nullable=False)
     version = Column(String, default="1.0.0")
     sector = Column(String, nullable=False)
@@ -64,54 +64,55 @@ class AISystemModel(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # Índice composto para performance em queries multi-tenant
+    # Composite index for multi-tenant query performance
     __table_args__ = (
         Index('idx_tenant_system', 'tenant_id', 'id'),
     )
 
     def __repr__(self):
-        return f"<AISystem(id={self.id}, tenant={self.tenant_id}, risk={self.risk_classification})>"
+        return f"<AISystem(id={self.id}, tenant={self.tenant_id}, name={self.name})>"
 
 
 class SystemRegistry:
     """
-    Registry de Sistemas de IA com Isolamento Multi-Tenant
+    AI System Registry with Multi-Tenant Isolation
 
     Security Features:
     - SQL Injection Prevention: SQLAlchemy ORM (no raw queries)
-    - BOLA Protection: tenant_id validation em todas as queries
+    - BOLA Protection: tenant_id validation in all queries
     - Audit Trail: created_at/updated_at timestamps
     """
 
     def __init__(self, db_url: str = "sqlite:///./data/btv_registry.db"):
         """
-        Inicializa registry com banco de dados
+        Initialize registry with database
 
         Args:
-            db_url: Database URL (SQLite ou PostgreSQL)
+            db_url: Database URL (SQLite or PostgreSQL)
         """
         self.engine = create_engine(
             db_url,
-            echo=False,  # Set True para debug SQL
-            pool_pre_ping=True,  # Valida conexões
+            echo=False,  # Set True for SQL debug
+            pool_pre_ping=True,  # Validate connections
         )
+
         Base.metadata.create_all(self.engine)
         self.Session = sessionmaker(bind=self.engine)
         logger.info(f"SystemRegistry initialized with {db_url}")
 
-    # === TENANT MANAGEMENT (Camada 2) ===
+    # === TENANT MANAGEMENT (Layer 2) ===
 
     def register_tenant(self, tenant_id: str, name: str, policy: Dict) -> str:
         """
-        Registra ou atualiza tenant (Upsert)
+        Register or update tenant (Upsert)
 
         Args:
-            tenant_id: UUID v4 do tenant
-            name: Nome da organização
-            policy: Política de governança (JSON)
+            tenant_id: Tenant UUID v4
+            name: Organization name
+            policy: Governance policy (JSON)
 
         Returns:
-            tenant_id registrado
+            Registered tenant_id
 
         Compliance:
             ISO 42001 4.2 (Understanding interested parties)
@@ -123,10 +124,12 @@ class SystemRegistry:
                 name=name,
                 governance_policy=policy
             )
-            session.merge(tenant)  # Upsert seguro
+
+            session.merge(tenant)  # Safe upsert
             session.commit()
             logger.info(f"Tenant registered: {tenant_id} ({name})")
             return tenant_id
+
         except Exception as e:
             session.rollback()
             logger.error(f"Failed to register tenant {tenant_id}: {e}")
@@ -140,30 +143,30 @@ class SystemRegistry:
             requesting_tenant: str
     ) -> Dict:
         """
-        Busca política do tenant com CONTROLE DE ACESSO
+        Retrieve tenant policy with ACCESS CONTROL
 
         Args:
-            tenant_id: ID do tenant alvo
-            requesting_tenant: ID do tenant que está fazendo a requisição
+            tenant_id: Target tenant ID
+            requesting_tenant: Requesting tenant ID
 
         Returns:
-            Política de governança (ou {} se acesso negado)
+            Governance policy (or {} if access denied)
 
         Security:
-            BOLA Protection - Tenant só pode acessar suas próprias políticas
+            BOLA Protection - Tenant can only access its own policies
         """
-        # CRITICAL: Validação de acesso cross-tenant
+        # CRITICAL: Cross-tenant access validation
         if tenant_id != requesting_tenant:
             logger.warning(
                 f"SECURITY ALERT: Cross-tenant access attempt detected! "
                 f"Requester: {requesting_tenant} tried to access {tenant_id}"
             )
-            # Retorna vazio (não expõe se tenant existe)
+            # Returns empty (does not expose if tenant exists)
             return {}
 
         session = self.Session()
         try:
-            # Query usando ORM (previne SQL Injection)
+            # Query using ORM (prevents SQL Injection)
             tenant = session.query(TenantModel).filter_by(id=tenant_id).first()
 
             if not tenant:
@@ -171,10 +174,11 @@ class SystemRegistry:
                 return {}
 
             return tenant.governance_policy or {}
+
         finally:
             session.close()
 
-    # === AI SYSTEM MANAGEMENT (Camada 3) ===
+    # === AI SYSTEM MANAGEMENT (Layer 3) ===
 
     def register_system(
             self,
@@ -182,22 +186,22 @@ class SystemRegistry:
             requesting_tenant: str
     ) -> str:
         """
-        Registra sistema de IA com validação de tenant
+        Register AI system with tenant validation
 
         Args:
-            system: Entidade AISystem
-            requesting_tenant: Tenant ID do JWT token
+            system: AISystem entity
+            requesting_tenant: Tenant ID from JWT token
 
         Returns:
-            system_id registrado
+            Registered system_id
 
         Security:
-            Mass Assignment Protection - tenant_id vem do token, não do payload
+            Mass Assignment Protection - tenant_id comes from token, not payload
 
         Raises:
-            ValueError: Se tenant_id do payload não match com o do token
+            ValueError: If payload tenant_id doesn't match token
         """
-        # CRITICAL: Previne Mass Assignment Attack
+        # CRITICAL: Prevents Mass Assignment Attack
         if system.tenant_id != requesting_tenant:
             raise ValueError(
                 f"Tenant ID mismatch: System claims tenant_id={system.tenant_id} "
@@ -209,7 +213,7 @@ class SystemRegistry:
         try:
             model = AISystemModel(
                 id=system.id,
-                tenant_id=requesting_tenant,  # Força uso do token
+                tenant_id=requesting_tenant,  # Forces token usage
                 name=system.name,
                 version=system.version,
                 sector=system.sector.value,
@@ -223,15 +227,16 @@ class SystemRegistry:
                 logging_capabilities=1 if system.logging_capabilities else 0,
                 jurisdiction=system.jurisdiction
             )
+
             session.merge(model)  # Upsert
             session.commit()
-
             logger.info(
                 f"AI System registered: {system.id} | "
                 f"Tenant: {requesting_tenant} | "
                 f"Risk: {system.risk_classification.value}"
             )
             return system.id
+
         except Exception as e:
             session.rollback()
             logger.error(f"Failed to register system {system.id}: {e}")
@@ -245,24 +250,24 @@ class SystemRegistry:
             requesting_tenant: str
     ) -> Optional[AISystem]:
         """
-        Busca sistema com isolamento multi-tenant
+        Retrieve system with multi-tenant isolation
 
         Args:
-            system_id: ID do sistema
-            requesting_tenant: Tenant ID do JWT token
+            system_id: System ID
+            requesting_tenant: Tenant ID from JWT token
 
         Returns:
-            AISystem entity ou None se não encontrado/sem acesso
+            AISystem entity or None if not found/no access
 
         Security:
-            BOLA Protection - Query filtra por system_id AND tenant_id
+            BOLA Protection - Query filters by system_id AND tenant_id
         """
         session = self.Session()
         try:
-            # CRITICAL: Query com tenant_id (isolamento)
+            # CRITICAL: Query with tenant_id (isolation)
             model = session.query(AISystemModel).filter_by(
                 id=system_id,
-                tenant_id=requesting_tenant  # Garante isolamento
+                tenant_id=requesting_tenant  # Ensures isolation
             ).first()
 
             if not model:
@@ -272,7 +277,7 @@ class SystemRegistry:
                 )
                 return None
 
-            # Reconstrói entity
+            # Rebuild entity
             return AISystem(
                 id=model.id,
                 tenant_id=model.tenant_id,
@@ -289,19 +294,20 @@ class SystemRegistry:
                 logging_capabilities=bool(model.logging_capabilities),
                 jurisdiction=model.jurisdiction
             )
+
         finally:
             session.close()
 
     def list_systems_by_tenant(self, tenant_id: str, limit: int = 100) -> list:
         """
-        Lista todos os sistemas de um tenant
+        List all systems of a tenant
 
         Args:
-            tenant_id: ID do tenant
-            limit: Número máximo de resultados
+            tenant_id: Tenant ID
+            limit: Maximum number of results
 
         Returns:
-            Lista de AISystem entities
+            List of AISystem entities
         """
         session = self.Session()
         try:
@@ -328,5 +334,6 @@ class SystemRegistry:
                 )
                 for m in models
             ]
+
         finally:
             session.close()

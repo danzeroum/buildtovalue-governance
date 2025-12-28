@@ -6,7 +6,7 @@ Unified vocabulary: ISO 42001 + EU AI Act + NIST AI RMF
 from enum import Enum
 
 class ArtifactType(str, Enum):
-    """Tipo de artefato gerado/processado"""
+    """Generated/processed artifact type"""
     CODE = "code"
     DATA_MODEL = "data_model"
     DEPLOYMENT = "deployment"
@@ -16,7 +16,7 @@ class ArtifactType(str, Enum):
     PROMPT = "prompt"
 
 class AIRole(str, Enum):
-    """Papel do agente na cadeia de IA (Art. 28 EU AI Act)"""
+    """AI agent role in the AI chain (Art. 28 EU AI Act)"""
     PROVIDER = "provider"
     DEPLOYER = "deployer"
     DISTRIBUTOR = "distributor"
@@ -25,8 +25,8 @@ class AIRole(str, Enum):
     USER = "user"
 
 class AISector(str, Enum):
-    """Setores de aplicação (Anexo III EU AI Act)"""
-    BANKING = "banking"  # Essencial para Fintech
+    """Application sectors (Annex III EU AI Act)"""
+    BANKING = "banking"
     INSURANCE = "insurance"
     HEALTHCARE = "healthcare"
     BIOMETRIC = "biometric"
@@ -43,21 +43,19 @@ class AISector(str, Enum):
     GENERAL = "general"
 
 class EUComplianceRisk(str, Enum):
-    """Níveis de risco (Art. 6-7 EU AI Act)"""
-    PROHIBITED = "prohibited" # Art. 5 (Era UNACCEPTABLE, padronizado para PROHIBITED conforme v0.9)
+    """Risk levels (Art. 6-7 EU AI Act)"""
+    PROHIBITED = "prohibited"  # Art. 5 (Was UNACCEPTABLE, standardized to PROHIBITED as per v0.9
     HIGH = "high"
     LIMITED = "limited"
     MINIMAL = "minimal"
     SYSTEMIC_GPAI = "systemic_gpai"
 
 class DecisionOutcome(str, Enum):
-    """Resultado da decisão de enforcement"""
+    """Enforcement decision outcome"""
     ALLOWED = "ALLOWED"
     BLOCKED = "BLOCKED"
     PENDING_REVIEW = "PENDING_REVIEW"
     ESCALATED = "ESCALATED"
-
-# --- NOVOS v0.9.0 (NIST) ---
 
 class AIPhase(str, Enum):
     DESIGN = "design"
@@ -94,7 +92,7 @@ class ThreatCategory(Enum):
 
 class ThreatDomain(Enum):
     """
-    Full threat taxonomy (9 domains - Huwyler 2025)
+    Full threat taxonomy
     """
     MISUSE = "MISUSE"
     POISONING = "POISONING"
