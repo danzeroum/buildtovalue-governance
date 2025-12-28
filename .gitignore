@@ -1,0 +1,42 @@
+
+# --- BuildToValue v0.9.0 Generated Files ---
+*.egg-info/
+build/
+dist/
+*.pyc
+__pycache__/
+
+# Reports (gerados dinamicamente)
+reports/*.json
+reports/*.html
+reports/*.md
+!reports/.gitkeep
+
+# Logs
+logs/
+*.log
+
+# Backups
+backup_*/
+
+# Environment
+.env
+.env.local
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Docker
+docker-compose.override.yml

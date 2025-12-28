@@ -1,3 +1,0 @@
-[console_scripts]
-btv-server = src.interface.api.gateway:main
-btv-token = scripts.generate_token:main
