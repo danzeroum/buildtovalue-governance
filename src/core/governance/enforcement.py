@@ -416,7 +416,7 @@ class EnforcementEngine:
         )
 
         baseline_risk = self._calculate_risk_score(classification)
-        controls_applied, residual_risk = self._apply_controls(
+        controls_applied, residual_risk = self.apply_controls(
             baseline_risk, classification, system
         )
         regulatory_impact = self._calculate_regulatory_impact(classification)
@@ -468,29 +468,81 @@ class EnforcementEngine:
         risk_score = min((base_score + severity_boost) * category_multiplier, 10.0)
         return round(risk_score, 2)
 
-    def _apply_controls(
+    def apply_controls(
             self,
             baseline_risk: float,
             classification: ThreatClassificationResult,
             system: AISystem
     ) -> Tuple[List[str], float]:
-        """Apply controls and calculate residual risk."""
-        controls = []
-        risk_reduction_factor = 1.0
+        """
+        Apply controls and calculate residual risk.
 
+        v0.9.5.3 FIX: Disable risk reduction for CRITICAL threats
+        - Baseline risk ≥ 9.0 → No reduction (already critical)
+        - Critical sub-threats → No reduction (prohibited practices)
+
+        v0.9.5 Basic implementation (foundation for v1.0 ROI tracking)
+        v1.0 Will track control effectiveness and cost avoidance
+
+        Args:
+            baseline_risk: Risk score without controls
+            classification: Threat classification
+            system: AI system being accessed
+
+        Returns:
+            Tuple of (controls_applied, residual_risk)
+        """
+        controls = []
+        risk_reduction_factor = 1.0  # No reduction by default
+
+        # ========================================================================
+        # v0.9.5.3 FIX: CRITICAL THREATS → NO RISK REDUCTION
+        # ========================================================================
+
+        # Rule 1: Baseline ≥ 9.0 = Already CRITICAL → No reduction
+        if baseline_risk >= 9.0:
+            return [], baseline_risk
+
+        # Rule 2: Critical sub-threats → No reduction (EU AI Act violations)
+        CRITICAL_SUB_THREATS = {
+            "prohibited_practice_biometric",
+            "prohibited_practice_polygraph",
+            "shadow_ai_credential_exposure",
+            "model_inversion",
+            "pii_leakage",
+            "financial_fraud_attempt",
+            "prompt_injection",
+            "proxy_discrimination",
+            "data_exfiltration",
+            "identity_fraud"
+        }
+
+        if classification.sub_threat_type in CRITICAL_SUB_THREATS:
+            return [], baseline_risk
+
+        # ========================================================================
+        # STANDARD CONTROLS (Only for non-critical threats)
+        # ========================================================================
+
+        # CONTROL 1: Bias Keyword Filter
         if ThreatDomain.BIASES in classification.detected_domains:
             controls.append("Bias Keyword Filter")
-            risk_reduction_factor *= 0.7
+            risk_reduction_factor *= 0.7  # 30% reduction
 
+        # CONTROL 2: PII Detection
         if ThreatDomain.PRIVACY in classification.detected_domains:
             controls.append("PII Detection")
-            risk_reduction_factor *= 0.6
+            risk_reduction_factor *= 0.6  # 40% reduction
 
+        # CONTROL 3: Shadow AI Credential Blocker (v0.9.5 NEW)
         if classification.sub_threat_type and "shadow_ai" in classification.sub_threat_type:
             controls.append("Shadow AI Credential Blocker")
-            risk_reduction_factor *= 0.3
+            risk_reduction_factor *= 0.3  # 70% reduction (CRITICAL control)
 
+        # Calculate residual risk
         residual_risk = baseline_risk * risk_reduction_factor
+
+        # Final score capped at 10.0
         return controls, round(residual_risk, 2)
 
     def _calculate_regulatory_impact(

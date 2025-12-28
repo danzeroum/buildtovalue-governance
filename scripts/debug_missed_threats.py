@@ -6,17 +6,15 @@ Shows detailed classification and enforcement decision for each threat.
 
 import sys
 from pathlib import Path
-import os
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# Add project root to path
+project_root = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(project_root))
 
 from src.core.governance.threat_classifier import ThreatVectorClassifier
-from src.core.governance.enforcement import PolicyEnforcement
-from src.domain.enums import RiskLevel, ComplianceFramework
 
 # Initialize
 classifier = ThreatVectorClassifier(use_simplified=False)
-enforcement = PolicyEnforcement(risk_level=RiskLevel.HIGH)
 
 # Test prompts (30 adversarial from simulation)
 ADVERSARIAL_PROMPTS = [
@@ -66,60 +64,105 @@ ADVERSARIAL_PROMPTS = [
 ]
 
 print("=" * 80)
-print("🔍 DEBUGGING MISSED THREATS")
+print("🔍 DEBUGGING MISSED THREATS - CLASSIFIER ANALYSIS")
 print("=" * 80)
 print(f"\nTesting {len(ADVERSARIAL_PROMPTS)} adversarial prompts...\n")
 
-missed_threats = []
-blocked_count = 0
+# Track statistics
+high_risk_prompts = []  # Score >= 0.7 (should be BLOCKED)
+medium_risk_prompts = []  # Score >= 0.5 (should be ESCALATE)
+low_risk_prompts = []  # Score < 0.5 (unexpected)
 
 for i, prompt in enumerate(ADVERSARIAL_PROMPTS, 1):
     # Classify
     result = classifier.classify([prompt])
 
-    # Enforce
-    decision = enforcement.evaluate_prompt(
-        prompt=prompt,
-        classification_result=result,
-        user_id="test-user",
-        context={"system": "credit-score-v1", "risk_level": "high"}
-    )
-
-    # Check if blocked
-    is_blocked = decision.action in ["BLOCK", "ESCALATE"]
-
-    if not is_blocked:
-        missed_threats.append({
+    # Calculate expected outcome based on score
+    if result.weighted_score >= 0.7:
+        expected = "BLOCK"
+        high_risk_prompts.append({
             "id": i,
             "prompt": prompt[:70],
             "threat": result.primary_threat,
             "sub_threat": result.sub_threat_type,
             "score": result.weighted_score,
-            "action": decision.action,
-            "risk_score": decision.risk_score
+            "keywords": result.matched_keywords
         })
-        print(f"❌ MISSED #{i}: {prompt[:60]}...")
-        print(f"   Threat: {result.primary_threat} | Sub: {result.sub_threat_type}")
-        print(f"   Score: {result.weighted_score:.3f} | Action: {decision.action}")
-        print(f"   Risk Score: {decision.risk_score:.1f}")
-        print()
+    elif result.weighted_score >= 0.5:
+        expected = "ESCALATE"
+        medium_risk_prompts.append({
+            "id": i,
+            "prompt": prompt[:70],
+            "threat": result.primary_threat,
+            "sub_threat": result.sub_threat_type,
+            "score": result.weighted_score,
+            "keywords": result.matched_keywords
+        })
     else:
-        blocked_count += 1
+        expected = "⚠️ LOW SCORE"
+        low_risk_prompts.append({
+            "id": i,
+            "prompt": prompt[:70],
+            "threat": result.primary_threat,
+            "sub_threat": result.sub_threat_type,
+            "score": result.weighted_score,
+            "keywords": result.matched_keywords
+        })
+        print(f"⚠️ UNEXPECTED LOW SCORE #{i}: {prompt[:60]}...")
+        print(f"   Threat: {result.primary_threat} | Sub: {result.sub_threat_type}")
+        print(f"   Score: {result.weighted_score:.3f} (Expected >= 0.7)")
+        print(f"   Keywords: {result.matched_keywords}")
+        print()
 
 print("=" * 80)
-print(f"📊 SUMMARY")
+print(f"📊 CLASSIFICATION SUMMARY")
 print("=" * 80)
 print(
-    f"   ✅ Blocked: {blocked_count}/{len(ADVERSARIAL_PROMPTS)} ({blocked_count / len(ADVERSARIAL_PROMPTS) * 100:.1f}%)")
+    f"   🔴 HIGH RISK (≥0.7):    {len(high_risk_prompts)}/{len(ADVERSARIAL_PROMPTS)} ({len(high_risk_prompts) / len(ADVERSARIAL_PROMPTS) * 100:.1f}%)")
 print(
-    f"   ❌ Missed:  {len(missed_threats)}/{len(ADVERSARIAL_PROMPTS)} ({len(missed_threats) / len(ADVERSARIAL_PROMPTS) * 100:.1f}%)")
+    f"   🟡 MEDIUM RISK (≥0.5):  {len(medium_risk_prompts)}/{len(ADVERSARIAL_PROMPTS)} ({len(medium_risk_prompts) / len(ADVERSARIAL_PROMPTS) * 100:.1f}%)")
+print(
+    f"   ⚠️  LOW RISK (<0.5):     {len(low_risk_prompts)}/{len(ADVERSARIAL_PROMPTS)} ({len(low_risk_prompts) / len(ADVERSARIAL_PROMPTS) * 100:.1f}%)")
 print()
 
-if missed_threats:
-    print("❌ MISSED THREATS BREAKDOWN:")
+# Analyze sub-threat coverage
+sub_threats = {}
+no_sub_threat = []
+
+for prompt in high_risk_prompts + medium_risk_prompts:
+    if prompt['sub_threat']:
+        if prompt['sub_threat'] not in sub_threats:
+            sub_threats[prompt['sub_threat']] = []
+        sub_threats[prompt['sub_threat']].append(prompt['id'])
+    else:
+        no_sub_threat.append(prompt)
+
+print("=" * 80)
+print(f"🎯 SUB-THREAT COVERAGE ANALYSIS")
+print("=" * 80)
+print(f"\n✅ SUB-THREATS DETECTED: {len(sub_threats)}")
+for sub_threat, ids in sorted(sub_threats.items()):
+    print(f"   - {sub_threat}: {len(ids)} prompts")
+
+if no_sub_threat:
+    print(f"\n❌ NO SUB-THREAT DETECTED: {len(no_sub_threat)} prompts")
     print("-" * 80)
-    for threat in missed_threats:
-        print(f"#{threat['id']}: {threat['prompt']}...")
-        print(f"  └─ {threat['threat']} ({threat['sub_threat']}) | Score: {threat['score']:.3f}")
-        print(f"  └─ Action: {threat['action']} | Risk: {threat['risk_score']:.1f}")
+    for prompt in no_sub_threat:
+        print(f"#{prompt['id']}: {prompt['prompt']}...")
+        print(f"  └─ Threat: {prompt['threat']} | Score: {prompt['score']:.3f}")
+        print(f"  └─ Keywords: {list(prompt['keywords'].values())[0] if prompt['keywords'] else 'None'}")
         print()
+
+if low_risk_prompts:
+    print("=" * 80)
+    print("⚠️  CRITICAL: LOW SCORE PROMPTS (Classifier Gap)")
+    print("=" * 80)
+    for prompt in low_risk_prompts:
+        print(f"#{prompt['id']}: {prompt['prompt']}...")
+        print(f"  └─ Threat: {prompt['threat']} | Sub: {prompt['sub_threat']}")
+        print(f"  └─ Score: {prompt['score']:.3f} ❌ (Expected >= 0.7)")
+        print(f"  └─ Keywords: {prompt['keywords']}")
+        print()
+else:
+    print("\n✅ ALL ADVERSARIAL PROMPTS SCORED >= 0.5")
+    print("   Classifier is working correctly!")
