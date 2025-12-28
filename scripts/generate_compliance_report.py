@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-BuildToValue v0.9.5.3 - Compliance & Audit Report Generator (Gold Master)
+BuildToValue v0.9.0 - Compliance & Audit Report Generator (Gold Master)
 
 Generates comprehensive executive-ready compliance reports for:
 - EU AI Act (Regulation 2024/1689)
@@ -301,7 +301,7 @@ def generate_compliance_report(
 
     report_data = {
         "metadata": {
-            "report_title": "BuildToValue v0.9.5.3 - Gold Master Compliance Certification",
+            "report_title": "BuildToValue v0.9.0 - Gold Master Compliance Certification",
             "generation_date": datetime.now().isoformat(),
             "version": CLASSIFIER_VERSION,
             "status": "GOLD MASTER - PRODUCTION READY",
@@ -474,28 +474,28 @@ def generate_compliance_report(
         "audit_trail": {
             "development_history": [
                 {
-                    "version": "v0.9.5.1",
+                    "version": "v0.9.0",
                     "date": "2025-12-27",
                     "prevention_rate": 56.7,
                     "precision": 100.0,
                     "issues": "13 false negatives (keyword gaps)"
                 },
                 {
-                    "version": "v0.9.5.2",
+                    "version": "v0.9.0",
                     "date": "2025-12-27",
                     "prevention_rate": 80.0,
                     "precision": 100.0,
                     "improvements": "47 new keywords, 9 sub-threats, prevalence weighting"
                 },
                 {
-                    "version": "v0.9.5.3 Beta",
+                    "version": "v0.9.0 Beta",
                     "date": "2025-12-28T00:40:00",
                     "prevention_rate": 100.0,
                     "precision": 83.3,
                     "issues": "6 false positives (legitimate operations blocked)"
                 },
                 {
-                    "version": "v0.9.5.3 Gold Master",
+                    "version": "v0.9.0 Gold Master",
                     "date": "2025-12-28T00:54:00",
                     "prevention_rate": 100.0,
                     "precision": 100.0,
@@ -513,7 +513,7 @@ def generate_compliance_report(
 
         "recommendations": {
             "immediate_actions": [
-                "✅ Git tag v0.9.5.3 with GPG-signed commit",
+                "✅ Git tag v0.9.0 with GPG-signed commit",
                 "✅ Update CHANGELOG.md with complete release notes",
                 "✅ Notify security, compliance, legal, and product teams",
                 "✅ Schedule staging deployment for integration testing",
@@ -1208,8 +1208,8 @@ Examples:
     parser.add_argument(
         "--output",
         type=str,
-        default="reports/compliance_v0.9.5.3.html",
-        help="Output path for HTML report (default: reports/compliance_v0.9.5.3.html)"
+        default="reports/compliance_v0.9.0.html",
+        help="Output path for HTML report (default: reports/compliance_v0.9.0.html)"
     )
 
     parser.add_argument(
