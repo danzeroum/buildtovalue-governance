@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuildToValue v0.9.5.3 - Multi-Sector Report</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+               line-height: 1.6; color: #333; max-width: 1200px; margin: 0 auto; 
+               padding: 20px; background: #f5f5f5; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                  color: white; padding: 30px; border-radius: 10px; margin-bottom: 20px; }
+        .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+                       gap: 15px; margin: 20px 0; }
+        .metric-card { background: white; padding: 20px; border-radius: 8px; 
+                       box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .metric-value { font-size: 32px; font-weight: bold; color: #667eea; }
+        .metric-label { font-size: 13px; color: #666; text-transform: uppercase; }
+        .success { color: #10b981; }
+        .warning { color: #f59e0b; }
+        .danger { color: #ef4444; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; background: white; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+        th { background: #f9fafb; font-weight: 600; }
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; 
+                 font-size: 12px; font-weight: 600; }
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛡️ BuildToValue v0.9.5.3 - Multi-Sector Report</h1>
+        <p><strong>Generated:</strong> 2025-12-28T02:32:08.134631</p>
+        <p><strong>Sectors:</strong> 5 | 
+           <strong>Requests:</strong> 500</p>
+    </div>
+
+    <div class="metric-grid">
+        <div class="metric-card">
+            <div class="metric-label">Avg Prevention Rate</div>
+            <div class="metric-value warning">
+                30.0%
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Avg Precision</div>
+            <div class="metric-value warning">
+                84.3%
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">False Negatives</div>
+            <div class="metric-value danger">
+                105
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">EU Fines Prevented</div>
+            <div class="metric-value">€175,000,000</div>
+        </div>
+    </div>
+
+    <h2>📊 Sector Performance</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Sector</th>
+                <th>Prevention</th>
+                <th>Precision</th>
+                <th>F1-Score</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            
+            <tr>
+                <td>🏥 Healthcare</td>
+                <td>10.0%</td>
+                <td>21.4%</td>
+                <td>13.6%</td>
+                <td><span class="badge badge-warning">
+                    WARN
+                </span></td>
+            </tr>
+            
+            <tr>
+                <td>👔 HR & Employment</td>
+                <td>46.7%</td>
+                <td>100.0%</td>
+                <td>63.6%</td>
+                <td><span class="badge badge-warning">
+                    WARN
+                </span></td>
+            </tr>
+            
+            <tr>
+                <td>🏛️ Government & Public Services</td>
+                <td>20.0%</td>
+                <td>100.0%</td>
+                <td>33.3%</td>
+                <td><span class="badge badge-warning">
+                    WARN
+                </span></td>
+            </tr>
+            
+            <tr>
+                <td>⚡ Critical Infrastructure</td>
+                <td>30.0%</td>
+                <td>100.0%</td>
+                <td>46.2%</td>
+                <td><span class="badge badge-warning">
+                    WARN
+                </span></td>
+            </tr>
+            
+            <tr>
+                <td>🎓 Education</td>
+                <td>43.3%</td>
+                <td>100.0%</td>
+                <td>60.5%</td>
+                <td><span class="badge badge-warning">
+                    WARN
+                </span></td>
+            </tr>
+            
+        </tbody>
+    </table>
+
+    <h2>🔍 Top Sub-Threats</h2>
+    <table>
+        <thead>
+            <tr><th>Rank</th><th>Sub-Threat</th><th>Count</th><th>Sectors</th></tr>
+        </thead>
+        <tbody>
+            
+            <tr>
+                <td>1</td>
+                <td>prohibited_practice_biometric</td>
+                <td>5</td>
+                <td>HR & Employment</td>
+            </tr>
+            
+            <tr>
+                <td>2</td>
+                <td>proxy_discrimination</td>
+                <td>4</td>
+                <td>Healthcare, HR & Employment</td>
+            </tr>
+            
+            <tr>
+                <td>3</td>
+                <td>ethnic_discrimination</td>
+                <td>2</td>
+                <td>Government & Public Services</td>
+            </tr>
+            
+            <tr>
+                <td>4</td>
+                <td>allocational_harm</td>
+                <td>2</td>
+                <td>Education</td>
+            </tr>
+            
+            <tr>
+                <td>5</td>
+                <td>fabrication</td>
+                <td>1</td>
+                <td>Critical Infrastructure</td>
+            </tr>
+            
+        </tbody>
+    </table>
+
+    <div style="margin-top: 40px; padding: 20px; background: #fef3c7; 
+                border-radius: 8px; text-align: center;">
+        <h3>⚠️ Some Metrics Below Target</h3>
+        <p>Scientific Basis: Huwyler (2025) - arXiv:2511.21901v1 [cs.CR]</p>
+    </div>
+</body>
+</html>

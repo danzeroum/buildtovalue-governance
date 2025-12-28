@@ -149,6 +149,17 @@ class BaseSectorSimulation(ABC):
         # ✅ v0.9.5.3 Engine Initialization
         engine = EnforcementEngine(use_simplified_taxonomy=False)
 
+        # ✅ Load sector-specific Safe Patterns (NEW)
+        try:
+            from src.core.governance.sector_safe_patterns import get_safe_patterns_for_sector
+            sector_patterns = get_safe_patterns_for_sector(config["sector_enum"])
+
+            if sector_patterns:
+                print(f"   ✅ Loaded {len(sector_patterns)} sector-specific Safe Patterns")
+                # Note: Pattern merging happens in ThreatVectorClassifier
+        except ImportError:
+            print("   ⚠️  Sector patterns not available (using global only)")
+
         # Create AISystem entity
         system = AISystem(
             id=config["system_id"],
@@ -168,7 +179,7 @@ class BaseSectorSimulation(ABC):
         print(f"   ✅ System: {system.id} (Risk: {system.risk_classification.value.upper()})")
         print(f"   ✅ Engine: v0.9.5.3 (Full Taxonomy + Regulatory Impact)")
 
-        return engine, system
+        return (engine, system)
 
     def generate_dataset(self) -> List[Tuple[str, str]]:
         """
@@ -287,31 +298,6 @@ class BaseSectorSimulation(ABC):
         self.stats["avg_latency_ms"] = (duration / self.total_requests) * 1000
         print(f"   Progress: {self.total_requests}/{self.total_requests}")
         print()
-
-    def setup_environment(self) -> Tuple[EnforcementEngine, AISystem]:
-        """
-        Sets up simulation environment with sector-specific configuration.
-
-        v0.9.5.3: Now includes sector-specific Safe Patterns
-        """
-        config = self.get_sector_config()
-        print(f"🏢 Setting up {config['sector_name']} environment (v0.9.5.3)...")
-
-        # ✅ v0.9.5.3 Engine Initialization
-        engine = EnforcementEngine(use_simplified_taxonomy=False)
-
-        # ✅ Load sector-specific Safe Patterns (NEW)
-        try:
-            from src.core.governance.sector_safe_patterns import get_safe_patterns_for_sector
-            sector_patterns = get_safe_patterns_for_sector(config["sector_enum"])
-
-            if sector_patterns:
-                print(f"   ✅ Loaded {len(sector_patterns)} sector-specific Safe Patterns")
-                # Merge with global patterns in classifier
-                # (This would require extending ThreatVectorClassifier.classify()
-                #  to accept sector parameter - see ITERAÇÃO 4)
-        except ImportError:
-            print("   ⚠️  Sector patterns not available (using global only)")
 
     def generate_report(self) -> Dict:
         """
@@ -443,7 +429,7 @@ class BaseSectorSimulation(ABC):
 SIMULATION_VERSION = "0.9.5.3"
 
 SIMULATION_BASIS = """
-v0.9.5.3 (2025-12-28 01:12) - Multi-Sector Simulation Framework:
+v0.9.5.3 (2025-12-28 01:55) - Multi-Sector Simulation Framework:
 
 ✅ COMPATIBILITY:
 - EnforcementEngine (Gold Master)
@@ -463,6 +449,11 @@ v0.9.5.3 (2025-12-28 01:12) - Multi-Sector Simulation Framework:
 - Government (Social Benefits)
 - Critical Infrastructure (Smart Grid)
 - Education (Essay Grading)
+
+✅ FIXES:
+- Removed duplicate setup_environment() method
+- Added proper return statement
+- Sector-specific Safe Patterns integration
 
 References:
 [1] Huwyler, H. (2025). Standardized Threat Taxonomy for AI Security
