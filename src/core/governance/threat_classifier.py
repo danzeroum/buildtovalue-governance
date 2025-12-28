@@ -78,7 +78,7 @@ THREAT_PATTERNS = {
             "do not share", "nda", "non-disclosure", "company confidential",
 
             # Credential Exposure (CRITICAL)
-            "api key", "api_key", "apikey",
+            "api key", "api_key", "apikey", "sk-proj-", "sk-",
             "private key", "secret key", "access token",
             "password", "credentials", "bearer token",
 
