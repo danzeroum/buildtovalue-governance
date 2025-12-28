@@ -4,10 +4,17 @@ BuildToValue - Government Simulation
 Social Benefits Fraud Detection (EU AI Act High-Risk)
 
 Compliance Focus:
-    - EU AI Act Art. 6 (Annex III - Essential Public Services)
-    - Art. 14 (Human Oversight - Fundamental Rights)
-    - GDPR Art. 22 (Right to Explanation)
+- EU AI Act Art. 6 (Annex III - Essential Public Services)
+- Art. 14 (Human Oversight - Fundamental Rights)
+- GDPR Art. 22 (Right to Explanation)
 """
+
+import sys
+import os
+from pathlib import Path
+
+# Path setup
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from base_simulation import BaseSectorSimulation
 from src.domain.enums import AISector, EUComplianceRisk

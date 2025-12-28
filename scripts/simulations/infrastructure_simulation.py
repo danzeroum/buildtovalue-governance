@@ -4,10 +4,17 @@ BuildToValue - Critical Infrastructure Simulation
 Smart Grid Management (EU AI Act High-Risk)
 
 Compliance Focus:
-    - EU AI Act Art. 6 (Annex III - Critical Infrastructure)
-    - Art. 15 (Robustness and Cybersecurity)
-    - ISO 42001 A.8.3 (Security Monitoring)
+- EU AI Act Art. 6 (Annex III - Critical Infrastructure)
+- Art. 15 (Robustness and Cybersecurity)
+- ISO 42001 A.8.3 (Security Monitoring)
 """
+
+import sys
+import os
+from pathlib import Path
+
+# Path setup
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from base_simulation import BaseSectorSimulation
 from src.domain.enums import AISector, EUComplianceRisk

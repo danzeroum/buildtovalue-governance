@@ -883,3 +883,19 @@ References:
 [3] ISO/IEC 42001:2023
 [4] EU AI Act (Regulation 2024/1689)
 """
+
+
+# ============================================================================
+# SECTOR-SPECIFIC SAFE PATTERNS (Optional Import)
+# ============================================================================
+
+try:
+    from src.core.governance.sector_safe_patterns import (
+        SECTOR_SAFE_PATTERNS,
+        merge_safe_patterns
+    )
+    # Merge global + sector patterns
+    # (Can be dynamically loaded in classify() method based on task context)
+except ImportError:
+    # Fallback to global patterns only
+    SECTOR_SAFE_PATTERNS = {}

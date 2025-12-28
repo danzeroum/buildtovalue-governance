@@ -4,10 +4,17 @@ BuildToValue - HR/Employment Simulation
 Automated Recruitment and Hiring (EU AI Act High-Risk)
 
 Compliance Focus:
-    - EU AI Act Art. 6 (Annex III - Employment)
-    - Art. 5 (Prohibited - Emotion Recognition)
-    - GDPR Art. 22 (Automated Decision Making)
+- EU AI Act Art. 6 (Annex III - Employment)
+- Art. 5 (Prohibited - Emotion Recognition)
+- GDPR Art. 22 (Automated Decision Making)
 """
+
+import sys
+import os
+from pathlib import Path
+
+# Path setup
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from base_simulation import BaseSectorSimulation
 from src.domain.enums import AISector, EUComplianceRisk

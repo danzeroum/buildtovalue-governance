@@ -4,13 +4,21 @@ BuildToValue - Education Simulation
 Automated Essay Grading (EU AI Act High-Risk)
 
 Compliance Focus:
-    - EU AI Act Art. 6 (Annex III - Education & Vocational Training)
-    - GDPR Art. 6 (Processing of Minors' Data)
-    - ISO 42001 A.4.2 (Human Oversight)
+- EU AI Act Art. 6 (Annex III - Education & Vocational Training)
+- GDPR Art. 6 (Processing of Minors' Data)
+- ISO 42001 A.4.2 (Human Oversight)
 """
+
+import sys
+import os
+from pathlib import Path
+
+# Path setup
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from base_simulation import BaseSectorSimulation
 from src.domain.enums import AISector, EUComplianceRisk
+
 
 
 class EducationSimulation(BaseSectorSimulation):

@@ -1,13 +1,19 @@
-#!/usr/bin/env python3
 """
 BuildToValue - Healthcare Simulation
-Medical Diagnosis Assistance (EU AI Act High-Risk)
+Automated Medical Diagnosis (EU AI Act High-Risk)
 
 Compliance Focus:
-    - EU AI Act Art. 6 (Annex III - Healthcare)
-    - Art. 14 (Human Oversight - Medical Supervision)
-    - ISO 42001 A.6.6 (Privacy - Health Data)
+- EU AI Act Art. 6 (Annex III - Healthcare)
+- GDPR Art. 9 (Special Category Data - Health)
+- HIPAA (US) - Health data protection
 """
+
+import sys
+import os
+from pathlib import Path
+
+# Path setup
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from base_simulation import BaseSectorSimulation
 from src.domain.enums import AISector, EUComplianceRisk
