@@ -5,6 +5,8 @@
 **Coverage**: 89.74% (770 statements, 79 missed)  
 **Maintainer**: BuildToValue Core Team
 
+> 📖 **For test rationale and justification**, see [`TEST_COVERAGE_JUSTIFICATION.md`](TEST_COVERAGE_JUSTIFICATION.md)
+
 ---
 
 ## 📊 Test Results Summary
@@ -25,11 +27,11 @@
 | OWASP Category | Tests | Status | Coverage |
 |----------------|-------|--------|----------|
 | **API1:2023** - BOLA | 5/5 | ✅ | 100% |
-| **API2:2023** - Broken Auth | 2/2 | ✅ | 100% |
+| **API2:2023** - Broken Auth | 3/3 | ✅ | 100% |
 | **API5:2023** - Broken Authorization | 1/1 | ✅ | 100% |
 | **API8:2023** - Security Misconfiguration | 3/4 | ⚠️ | 75% (1 skipped) |
 
-**Total Security Tests**: 11/12 active (1 skipped)
+**Total Security Tests**: 12/13 (11 active passing, 1 skipped)
 
 ### Security Test Details
 
@@ -40,7 +42,7 @@
 - `test_list_systems_isolation` ✅
 - `test_sql_injection_via_system_id` ✅
 
-#### ✅ Authentication & Authorization (3 tests)
+#### ✅ Authentication & Authorization (4 tests)
 - `test_jwt_token_validation_success` ✅
 - `test_jwt_token_missing_claims` ✅
 - `test_expired_token_rejection` ✅
@@ -125,7 +127,7 @@
 1. **UUID Validation** (`test_uuid_validation_rejects_invalid_format`)
    - **Issue**: Entity validation not enforced
    - **Impact**: Low (SQL injection already protected by SQLAlchemy)
-   - **Tracking**: [Issue #TBD]
+   - **Tracking**: v0.9.5 milestone
 
 2. **Entity Compliance Validation** (3 tests)
    - `test_high_risk_system_requires_logging`
@@ -133,7 +135,7 @@
    - `test_systemic_gpai_requires_high_flops`
    - **Issue**: Pydantic validators not implemented
    - **Impact**: Medium (manual validation required)
-   - **Tracking**: [Issue #TBD]
+   - **Tracking**: v0.9.5 milestone
 
 3. **Control Application** (3 tests)
    - `test_bias_control_reduces_risk`
@@ -141,7 +143,7 @@
    - `test_multiple_controls_stack`
    - **Issue**: Control orchestration engine incomplete
    - **Impact**: Low (controls logged but not enforced)
-   - **Tracking**: [Issue #TBD]
+   - **Tracking**: v0.9.5 milestone
 
 ---
 
@@ -185,6 +187,9 @@ open htmlcov/index.html
 Linux
 xdg-open htmlcov/index.html
 
+
+**📊 Coverage Dashboard**: Shows which lines are tested (green) vs untested (red).  
+**Interactive**: Click on any file to see line-by-line coverage.
 
 ---
 
@@ -259,11 +264,14 @@ xdg-open htmlcov/index.html
 Open an issue: [GitHub Issues](https://github.com/danzeroum/buildtovalue-governance/issues)
 
 **Contributing tests?**  
-See: `CONTRIBUTING.md`
+See: [`TEST_COVERAGE_JUSTIFICATION.md`](TEST_COVERAGE_JUSTIFICATION.md#contributing-new-tests)
+
+**Skipped tests roadmap?**  
+See: [v0.9.5 Milestone](https://github.com/danzeroum/buildtovalue-governance/milestone/2)
 
 ---
 
 **Status**: ✅ **APPROVED FOR PRODUCTION**  
 **Signed-off by**: BuildToValue Core Team  
-**Date**: December 28, 2025
-
+**Date**: December 28, 2025  
+**Next Review**: March 2026 (v0.9.5 release)
