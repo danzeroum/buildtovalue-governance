@@ -385,7 +385,7 @@ class EnforcementEngine:
 
     THRESHOLD_CRITICAL = 9.0
     THRESHOLD_HIGH = 7.0
-    THRESHOLD_MEDIUM = 5.0
+    THRESHOLD_MEDIUM = 4.0
     THRESHOLD_LOW = 3.0
 
     def __init__(
