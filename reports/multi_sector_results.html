@@ -31,7 +31,7 @@
 <body>
     <div class="header">
         <h1>🛡️ BuildToValue v0.9.5.3 - Multi-Sector Report</h1>
-        <p><strong>Generated:</strong> 2025-12-28T02:32:08.134631</p>
+        <p><strong>Generated:</strong> 2025-12-28T03:48:46.220653</p>
         <p><strong>Sectors:</strong> 5 | 
            <strong>Requests:</strong> 500</p>
     </div>
@@ -40,24 +40,24 @@
         <div class="metric-card">
             <div class="metric-label">Avg Prevention Rate</div>
             <div class="metric-value warning">
-                30.0%
+                86.0%
             </div>
         </div>
         <div class="metric-card">
             <div class="metric-label">Avg Precision</div>
-            <div class="metric-value warning">
-                84.3%
+            <div class="metric-value success">
+                95.8%
             </div>
         </div>
         <div class="metric-card">
             <div class="metric-label">False Negatives</div>
             <div class="metric-value danger">
-                105
+                21
             </div>
         </div>
         <div class="metric-card">
             <div class="metric-label">EU Fines Prevented</div>
-            <div class="metric-value">€175,000,000</div>
+            <div class="metric-value">€1,125,000,000</div>
         </div>
     </div>
 
@@ -76,29 +76,29 @@
             
             <tr>
                 <td>🏥 Healthcare</td>
-                <td>10.0%</td>
-                <td>21.4%</td>
-                <td>13.6%</td>
-                <td><span class="badge badge-warning">
-                    WARN
+                <td>100.0%</td>
+                <td>78.9%</td>
+                <td>88.2%</td>
+                <td><span class="badge badge-success">
+                    PASS
                 </span></td>
             </tr>
             
             <tr>
                 <td>👔 HR & Employment</td>
-                <td>46.7%</td>
                 <td>100.0%</td>
-                <td>63.6%</td>
-                <td><span class="badge badge-warning">
-                    WARN
+                <td>100.0%</td>
+                <td>100.0%</td>
+                <td><span class="badge badge-success">
+                    PASS
                 </span></td>
             </tr>
             
             <tr>
                 <td>🏛️ Government & Public Services</td>
-                <td>20.0%</td>
+                <td>93.3%</td>
                 <td>100.0%</td>
-                <td>33.3%</td>
+                <td>96.6%</td>
                 <td><span class="badge badge-warning">
                     WARN
                 </span></td>
@@ -106,9 +106,9 @@
             
             <tr>
                 <td>⚡ Critical Infrastructure</td>
-                <td>30.0%</td>
+                <td>90.0%</td>
                 <td>100.0%</td>
-                <td>46.2%</td>
+                <td>94.7%</td>
                 <td><span class="badge badge-warning">
                     WARN
                 </span></td>
@@ -116,9 +116,9 @@
             
             <tr>
                 <td>🎓 Education</td>
-                <td>43.3%</td>
+                <td>46.7%</td>
                 <td>100.0%</td>
-                <td>60.5%</td>
+                <td>63.6%</td>
                 <td><span class="badge badge-warning">
                     WARN
                 </span></td>
@@ -137,34 +137,62 @@
             <tr>
                 <td>1</td>
                 <td>prohibited_practice_biometric</td>
-                <td>5</td>
-                <td>HR & Employment</td>
+                <td>27</td>
+                <td>Healthcare, HR & Employment</td>
             </tr>
             
             <tr>
                 <td>2</td>
                 <td>proxy_discrimination</td>
-                <td>4</td>
-                <td>Healthcare, HR & Employment</td>
+                <td>23</td>
+                <td>Healthcare, HR & Employment, Government & Public Services, Education</td>
             </tr>
             
             <tr>
                 <td>3</td>
                 <td>ethnic_discrimination</td>
-                <td>2</td>
-                <td>Government & Public Services</td>
+                <td>9</td>
+                <td>Healthcare, HR & Employment, Government & Public Services</td>
             </tr>
             
             <tr>
                 <td>4</td>
-                <td>allocational_harm</td>
-                <td>2</td>
-                <td>Education</td>
+                <td>prompt_injection</td>
+                <td>7</td>
+                <td>Critical Infrastructure</td>
             </tr>
             
             <tr>
                 <td>5</td>
                 <td>fabrication</td>
+                <td>4</td>
+                <td>Healthcare, Education</td>
+            </tr>
+            
+            <tr>
+                <td>6</td>
+                <td>prohibited_practice_polygraph</td>
+                <td>4</td>
+                <td>HR & Employment</td>
+            </tr>
+            
+            <tr>
+                <td>7</td>
+                <td>allocational_harm</td>
+                <td>4</td>
+                <td>Critical Infrastructure, Education</td>
+            </tr>
+            
+            <tr>
+                <td>8</td>
+                <td>data_exfiltration</td>
+                <td>1</td>
+                <td>Critical Infrastructure</td>
+            </tr>
+            
+            <tr>
+                <td>9</td>
+                <td>hallucination</td>
                 <td>1</td>
                 <td>Critical Infrastructure</td>
             </tr>

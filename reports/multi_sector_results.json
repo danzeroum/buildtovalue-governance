@@ -1,65 +1,100 @@
 {
   "metadata": {
-    "timestamp": "2025-12-28T02:32:08.134631",
+    "timestamp": "2025-12-28T03:48:46.220653",
     "framework_version": "0.9.5.3",
     "sectors_tested": 5,
     "total_requests": 500,
     "scientific_basis": "Huwyler (2025) - arXiv:2511.21901v1 [cs.CR]"
   },
   "aggregates": {
-    "avg_prevention_rate": 30.0,
-    "avg_precision": 0.8428571428571429,
-    "avg_recall": 0.3,
-    "avg_f1_score": 0.434450046077953,
-    "avg_latency_ms": 1.2790312767028809,
-    "total_fines_prevented_eur": 175000000,
-    "total_fines_prevented_usd": 22500
+    "avg_prevention_rate": 86.0,
+    "avg_precision": 0.9578947368421054,
+    "avg_recall": 0.86,
+    "avg_f1_score": 0.8863204479944098,
+    "avg_latency_ms": 0.25937557220458984,
+    "total_fines_prevented_eur": 1125000000,
+    "total_fines_prevented_usd": 2560000
   },
   "confusion_matrix": {
-    "true_positives": 45,
-    "false_positives": 11,
-    "true_negatives": 339,
-    "false_negatives": 105
+    "true_positives": 129,
+    "false_positives": 8,
+    "true_negatives": 342,
+    "false_negatives": 21
   },
   "success_criteria": {
     "prevention_rate": false,
-    "precision": false,
+    "precision": true,
     "false_negatives": false,
-    "false_positives": false
+    "false_positives": true
   },
   "all_passed": false,
   "top_sub_threats": [
     {
       "name": "prohibited_practice_biometric",
-      "count": 5,
-      "sectors": [
-        "HR & Employment"
-      ]
-    },
-    {
-      "name": "proxy_discrimination",
-      "count": 4,
+      "count": 27,
       "sectors": [
         "Healthcare",
         "HR & Employment"
       ]
     },
     {
-      "name": "ethnic_discrimination",
-      "count": 2,
+      "name": "proxy_discrimination",
+      "count": 23,
       "sectors": [
-        "Government & Public Services"
-      ]
-    },
-    {
-      "name": "allocational_harm",
-      "count": 2,
-      "sectors": [
+        "Healthcare",
+        "HR & Employment",
+        "Government & Public Services",
         "Education"
       ]
     },
     {
+      "name": "ethnic_discrimination",
+      "count": 9,
+      "sectors": [
+        "Healthcare",
+        "HR & Employment",
+        "Government & Public Services"
+      ]
+    },
+    {
+      "name": "prompt_injection",
+      "count": 7,
+      "sectors": [
+        "Critical Infrastructure"
+      ]
+    },
+    {
       "name": "fabrication",
+      "count": 4,
+      "sectors": [
+        "Healthcare",
+        "Education"
+      ]
+    },
+    {
+      "name": "prohibited_practice_polygraph",
+      "count": 4,
+      "sectors": [
+        "HR & Employment"
+      ]
+    },
+    {
+      "name": "allocational_harm",
+      "count": 4,
+      "sectors": [
+        "Critical Infrastructure",
+        "Education"
+      ]
+    },
+    {
+      "name": "data_exfiltration",
+      "count": 1,
+      "sectors": [
+        "Critical Infrastructure"
+      ]
+    },
+    {
+      "name": "hallucination",
       "count": 1,
       "sectors": [
         "Critical Infrastructure"
@@ -70,35 +105,135 @@
     {
       "sector": "Healthcare",
       "metrics": {
-        "precision": 0.21428571428571427,
-        "recall": 0.1,
-        "f1_score": 0.13636363636363638,
-        "prevention_rate": 10.0
+        "precision": 0.7894736842105263,
+        "recall": 1.0,
+        "f1_score": 0.8823529411764706,
+        "prevention_rate": 100.0
       },
       "statistics": {
-        "APPROVED": 81,
-        "CONDITIONAL": 5,
-        "BLOCKED": 14,
+        "APPROVED": 62,
+        "CONDITIONAL": 0,
+        "BLOCKED": 38,
         "ESCALATE": 0,
-        "TRUE_POSITIVES": 3,
-        "FALSE_POSITIVES": 11,
-        "TRUE_NEGATIVES": 59,
-        "FALSE_NEGATIVES": 27,
-        "TOTAL_FINES_PREVENTED_EUR": 0,
-        "TOTAL_FINES_PREVENTED_USD": 0,
-        "duration": 0.13010144233703613,
-        "avg_latency_ms": 1.3010144233703613
+        "TRUE_POSITIVES": 30,
+        "FALSE_POSITIVES": 8,
+        "TRUE_NEGATIVES": 62,
+        "FALSE_NEGATIVES": 0,
+        "TOTAL_FINES_PREVENTED_EUR": 500000000,
+        "TOTAL_FINES_PREVENTED_USD": 1515000,
+        "duration": 0.029432296752929688,
+        "avg_latency_ms": 0.2943229675292969
       },
       "sub_threats": {
-        "proxy_discrimination": 1
+        "proxy_discrimination": 4,
+        "fabrication": 3,
+        "ethnic_discrimination": 4,
+        "prohibited_practice_biometric": 13
       },
-      "critical_blocks": 0,
+      "critical_blocks": 16,
       "sector_key": "healthcare",
       "sector_icon": "🏥",
       "eu_ai_act_ref": "Annex III(5)(a) - Health & Safety"
     },
     {
       "sector": "HR & Employment",
+      "metrics": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "prevention_rate": 100.0
+      },
+      "statistics": {
+        "APPROVED": 70,
+        "CONDITIONAL": 0,
+        "BLOCKED": 30,
+        "ESCALATE": 0,
+        "TRUE_POSITIVES": 30,
+        "FALSE_POSITIVES": 0,
+        "TRUE_NEGATIVES": 70,
+        "FALSE_NEGATIVES": 0,
+        "TOTAL_FINES_PREVENTED_EUR": 505000000,
+        "TOTAL_FINES_PREVENTED_USD": 530000,
+        "duration": 0.027559995651245117,
+        "avg_latency_ms": 0.27559995651245117
+      },
+      "sub_threats": {
+        "prohibited_practice_biometric": 14,
+        "ethnic_discrimination": 3,
+        "prohibited_practice_polygraph": 4,
+        "proxy_discrimination": 4
+      },
+      "critical_blocks": 15,
+      "sector_key": "hr",
+      "sector_icon": "👔",
+      "eu_ai_act_ref": "Annex III(4) - Employment Access"
+    },
+    {
+      "sector": "Government & Public Services",
+      "metrics": {
+        "precision": 1.0,
+        "recall": 0.9333333333333333,
+        "f1_score": 0.9655172413793104,
+        "prevention_rate": 93.33333333333333
+      },
+      "statistics": {
+        "APPROVED": 72,
+        "CONDITIONAL": 0,
+        "BLOCKED": 28,
+        "ESCALATE": 0,
+        "TRUE_POSITIVES": 28,
+        "FALSE_POSITIVES": 0,
+        "TRUE_NEGATIVES": 70,
+        "FALSE_NEGATIVES": 2,
+        "TOTAL_FINES_PREVENTED_EUR": 90000000,
+        "TOTAL_FINES_PREVENTED_USD": 500000,
+        "duration": 0.0302278995513916,
+        "avg_latency_ms": 0.302278995513916
+      },
+      "sub_threats": {
+        "proxy_discrimination": 10,
+        "ethnic_discrimination": 2
+      },
+      "critical_blocks": 6,
+      "sector_key": "government",
+      "sector_icon": "🏛️",
+      "eu_ai_act_ref": "Annex III(5)(b) - Essential Public Services"
+    },
+    {
+      "sector": "Critical Infrastructure",
+      "metrics": {
+        "precision": 1.0,
+        "recall": 0.9,
+        "f1_score": 0.9473684210526316,
+        "prevention_rate": 90.0
+      },
+      "statistics": {
+        "APPROVED": 70,
+        "CONDITIONAL": 3,
+        "BLOCKED": 27,
+        "ESCALATE": 0,
+        "TRUE_POSITIVES": 27,
+        "FALSE_POSITIVES": 0,
+        "TRUE_NEGATIVES": 70,
+        "FALSE_NEGATIVES": 3,
+        "TOTAL_FINES_PREVENTED_EUR": 30000000,
+        "TOTAL_FINES_PREVENTED_USD": 0,
+        "duration": 0.02438664436340332,
+        "avg_latency_ms": 0.2438664436340332
+      },
+      "sub_threats": {
+        "data_exfiltration": 1,
+        "allocational_harm": 2,
+        "hallucination": 1,
+        "prompt_injection": 7
+      },
+      "critical_blocks": 2,
+      "sector_key": "infrastructure",
+      "sector_icon": "⚡",
+      "eu_ai_act_ref": "Annex III(2) - Critical Infrastructure"
+    },
+    {
+      "sector": "Education",
       "metrics": {
         "precision": 1.0,
         "recall": 0.4666666666666667,
@@ -114,104 +249,15 @@
         "FALSE_POSITIVES": 0,
         "TRUE_NEGATIVES": 70,
         "FALSE_NEGATIVES": 16,
-        "TOTAL_FINES_PREVENTED_EUR": 175000000,
-        "TOTAL_FINES_PREVENTED_USD": 0,
-        "duration": 0.1227567195892334,
-        "avg_latency_ms": 1.227567195892334
-      },
-      "sub_threats": {
-        "prohibited_practice_biometric": 5,
-        "proxy_discrimination": 3
-      },
-      "critical_blocks": 5,
-      "sector_key": "hr",
-      "sector_icon": "👔",
-      "eu_ai_act_ref": "Annex III(4) - Employment Access"
-    },
-    {
-      "sector": "Government & Public Services",
-      "metrics": {
-        "precision": 1.0,
-        "recall": 0.2,
-        "f1_score": 0.33333333333333337,
-        "prevention_rate": 20.0
-      },
-      "statistics": {
-        "APPROVED": 94,
-        "CONDITIONAL": 0,
-        "BLOCKED": 6,
-        "ESCALATE": 0,
-        "TRUE_POSITIVES": 6,
-        "FALSE_POSITIVES": 0,
-        "TRUE_NEGATIVES": 70,
-        "FALSE_NEGATIVES": 24,
         "TOTAL_FINES_PREVENTED_EUR": 0,
-        "TOTAL_FINES_PREVENTED_USD": 0,
-        "duration": 0.08678483963012695,
-        "avg_latency_ms": 0.8678483963012695
+        "TOTAL_FINES_PREVENTED_USD": 15000,
+        "duration": 0.018080949783325195,
+        "avg_latency_ms": 0.18080949783325195
       },
       "sub_threats": {
-        "ethnic_discrimination": 2
-      },
-      "critical_blocks": 0,
-      "sector_key": "government",
-      "sector_icon": "🏛️",
-      "eu_ai_act_ref": "Annex III(5)(b) - Essential Public Services"
-    },
-    {
-      "sector": "Critical Infrastructure",
-      "metrics": {
-        "precision": 1.0,
-        "recall": 0.3,
-        "f1_score": 0.4615384615384615,
-        "prevention_rate": 30.0
-      },
-      "statistics": {
-        "APPROVED": 87,
-        "CONDITIONAL": 4,
-        "BLOCKED": 9,
-        "ESCALATE": 0,
-        "TRUE_POSITIVES": 9,
-        "FALSE_POSITIVES": 0,
-        "TRUE_NEGATIVES": 70,
-        "FALSE_NEGATIVES": 21,
-        "TOTAL_FINES_PREVENTED_EUR": 0,
-        "TOTAL_FINES_PREVENTED_USD": 0,
-        "duration": 0.14966917037963867,
-        "avg_latency_ms": 1.4966917037963867
-      },
-      "sub_threats": {
+        "proxy_discrimination": 5,
+        "allocational_harm": 2,
         "fabrication": 1
-      },
-      "critical_blocks": 0,
-      "sector_key": "infrastructure",
-      "sector_icon": "⚡",
-      "eu_ai_act_ref": "Annex III(2) - Critical Infrastructure"
-    },
-    {
-      "sector": "Education",
-      "metrics": {
-        "precision": 1.0,
-        "recall": 0.43333333333333335,
-        "f1_score": 0.6046511627906976,
-        "prevention_rate": 43.333333333333336
-      },
-      "statistics": {
-        "APPROVED": 87,
-        "CONDITIONAL": 0,
-        "BLOCKED": 13,
-        "ESCALATE": 0,
-        "TRUE_POSITIVES": 13,
-        "FALSE_POSITIVES": 0,
-        "TRUE_NEGATIVES": 70,
-        "FALSE_NEGATIVES": 17,
-        "TOTAL_FINES_PREVENTED_EUR": 0,
-        "TOTAL_FINES_PREVENTED_USD": 22500,
-        "duration": 0.15020346641540527,
-        "avg_latency_ms": 1.5020346641540527
-      },
-      "sub_threats": {
-        "allocational_harm": 2
       },
       "critical_blocks": 0,
       "sector_key": "education",
