@@ -584,7 +584,11 @@ BuildToValue é construído sobre os ombros de gigantes:
 
 </div>
 ```
-
-
 ---
 
+## Test Status
+
+[![Tests](https://img.shields.io/badge/tests-61%20passed-success)](tests/)
+[![Coverage](https://img.shields.io/badge/coverage-89.74%25-brightgreen)](htmlcov/index.html)
+[![Security](https://img.shields.io/badge/OWASP-API%20Top%2010-blue)](tests/security/)
+[![Skipped](https://img.shields.io/badge/skipped-7%20(v0.9.5)-yellow)](tests/TEST_STATUS_v0.9.0.md)
