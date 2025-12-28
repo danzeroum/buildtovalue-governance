@@ -375,7 +375,7 @@ class TestControlApplication(unittest.TestCase):
         classification = self.classifier.classify(issues)
         baseline_risk = self.engine._calculate_risk_score(classification)
 
-        controls, residual_risk = self.engine._apply_controls(
+        controls, residual_risk = self.engine.apply_controls(
             baseline_risk, classification, self.system
         )
 
@@ -388,7 +388,7 @@ class TestControlApplication(unittest.TestCase):
         classification = self.classifier.classify(issues)
         baseline_risk = self.engine._calculate_risk_score(classification)
 
-        controls, residual_risk = self.engine._apply_controls(
+        controls, residual_risk = self.engine.apply_controls(
             baseline_risk, classification, self.system
         )
 
@@ -404,7 +404,7 @@ class TestControlApplication(unittest.TestCase):
         classification = self.classifier.classify(issues)
         baseline_risk = self.engine._calculate_risk_score(classification)
 
-        controls, residual_risk = self.engine._apply_controls(
+        controls, residual_risk = self.engine.apply_controls(
             baseline_risk, classification, self.system
         )
 

@@ -1,11 +1,19 @@
+# tests/conftest.py (CORREÇÃO DO CLEANUP)
 """
 Pytest fixtures e configurações globais
 """
+import sys
+from pathlib import Path
+
+# ✅ Adiciona raiz do projeto ao sys.path para resolver imports de 'src'
+root_dir = Path(__file__).parent.parent
+if str(root_dir) not in sys.path:
+    sys.path.insert(0, str(root_dir))
 
 import pytest
 import os
-from pathlib import Path
 from datetime import timedelta
+import gc
 
 # Setup test environment
 os.environ["JWT_SECRET"] = "test-secret-key-for-pytest"
@@ -28,9 +36,29 @@ def test_db():
 
     yield registry
 
-    # Cleanup
-    if db_path.exists():
-        db_path.unlink()
+    # ✅ CORREÇÃO: Cleanup mais robusto para Windows
+    try:
+        # Fechar conexões explicitamente
+        if hasattr(registry, 'engine'):
+            registry.engine.dispose()
+
+        # Forçar garbage collection para liberar handles
+        del registry
+        gc.collect()
+
+        # Aguardar um momento para o Windows liberar o arquivo
+        import time
+        time.sleep(0.1)
+
+        # Tentar remover (se falhar, não é crítico)
+        if db_path.exists():
+            db_path.unlink()
+    except PermissionError:
+        # Ignorar erro de permissão no Windows (não é crítico para testes)
+        pass
+    except Exception as e:
+        # Log outros erros mas não falhar o teste
+        print(f"Warning: Cleanup error: {e}")
 
 
 @pytest.fixture
