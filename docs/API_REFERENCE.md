@@ -1,48 +1,49 @@
-# API Reference
+# BuildToValue Framework v0.9.0 - API Reference
 
-**BuildToValue Framework v0.9**  
-**Base URL:** `https://api.buildtovalue.ai` (production)  
-**Base URL (Local):** `http://localhost:8000`
+**Base URL (Production)**: `https://api.buildtovalue.ai`  
+**Base URL (Local)**: `http://localhost:8000`  
+**Last Updated**: December 28, 2025
 
 ---
 
-## Authentication
+## 🔐 Authentication
+
+All endpoints except `/health` require JWT authentication.
 
 ### JWT Bearer Token
 
-Todos os endpoints (exceto `/health`) requerem autenticação via JWT.
-
-**Header:**
 Authorization: Bearer <JWT_TOKEN>
 
-text
-
 **Generate Token:**
-python scripts/generate_token.py
---role admin
---tenant 550e8400-e29b-41d4-a716-446655440000
---days 30
+python scripts/generate_token.py --role admin --tenant <TENANT_UUID> --days 30
 
-text
+**Token Claims:**
+- `tenant_id`: Multi-tenant isolation (required)
+- `user_id`: User identifier
+- `role`: RBAC role (`admin`, `dev`, `auditor`, `app`)
+- `exp`: Expiration timestamp (default: 30 minutes)
 
 ---
 
-## Endpoints
+## 📡 Endpoints
 
 ### Health Check
 
 #### `GET /health`
 
-Verifica status do serviço (sem autenticação).
+Verify service status (no authentication required).
 
 **Response 200:**
 {
 "status": "healthy",
 "version": "0.9.0",
-"security": "hardened"
+"security": "hardened",
+"features": {
+"kill_switch": true,
+"compliance_reports": true,
+"threat_classification": true
 }
-
-text
+}
 
 ---
 
@@ -50,15 +51,15 @@ text
 
 #### `POST /v1/tenants`
 
-Registra ou atualiza tenant (Camada 2 - Empresa).
+Register or update tenant (Layer 2 - Organization).
 
-**Auth:** `admin` role required  
-**Rate Limit:** 10 req/min
+**Auth**: `admin` role required  
+**Rate Limit**: 10 req/min
 
-**Request:**
+**Request Body:**
 {
 "id": "550e8400-e29b-41d4-a716-446655440000",
-"name": "Banco Seguro S.A.",
+"name": "Secure Bank Inc.",
 "policy": {
 "autonomy_matrix": {
 "production": {
@@ -71,21 +72,17 @@ Registra ou atualiza tenant (Camada 2 - Empresa).
 }
 }
 
-text
-
 **Response 201:**
 {
 "status": "registered",
 "tenant_id": "550e8400-e29b-41d4-a716-446655440000",
-"message": "Tenant 'Banco Seguro S.A.' registered successfully"
+"message": "Tenant 'Secure Bank Inc.' registered successfully"
 }
 
-text
-
 **Errors:**
-- `401 Unauthorized` - Token inválido/expirado
-- `403 Forbidden` - Role não autorizada
-- `400 Bad Request` - UUID inválido
+- `401 Unauthorized`: Invalid/expired token
+- `403 Forbidden`: Insufficient role
+- `400 Bad Request`: Invalid UUID format
 
 ---
 
@@ -93,12 +90,12 @@ text
 
 #### `POST /v1/systems`
 
-Registra sistema de IA (Camada 3 - Projeto).
+Register AI system (Layer 3 - Project).
 
-**Auth:** `admin` ou `dev` role  
-**Rate Limit:** 50 req/min
+**Auth**: `admin` or `dev` role  
+**Rate Limit**: 50 req/min
 
-**Request:**
+**Request Body:**
 {
 "id": "credit-scoring-v2",
 "name": "Credit Risk Scoring AI",
@@ -110,37 +107,34 @@ Registra sistema de IA (Camada 3 - Projeto).
 "eu_database_id": "EU-DB-12345",
 "training_flops": 1e24,
 "logging_enabled": true,
-"jurisdiction": "EU"
+"jurisdiction": "EU",
+"intended_purpose": "Assess credit risk for loan applications",
+"prohibited_domains": ["social_scoring", "political_profiling"],
+"lifecycle_phase": "deployment",
+"operational_status": "active"
 }
-
-text
 
 **Response 201:**
 {
 "status": "registered",
 "system_id": "credit-scoring-v2",
 "tenant_id": "550e8400-e29b-41d4-a716-446655440000",
-"message": "System 'Credit Risk Scoring AI' registered successfully"
+"message": "System 'Credit Risk Scoring AI' registered successfully",
+"compliance_summary": {
+"lifecycle_phase": "deployment",
+"operational_status": "active",
+"requires_human_oversight": true,
+"nist_alignment": "70%"
 }
-
-text
-
-**Validation Errors:**
-{
-"error": true,
-"status_code": 400,
-"message": "Sistema de ALTO RISCO deve ter logging_capabilities=True (Art. 12 EU AI Act)"
 }
-
-text
 
 ---
 
 #### `GET /v1/systems/{system_id}`
 
-Busca detalhes de um sistema.
+Retrieve AI system details.
 
-**Auth:** `admin`, `dev` ou `auditor`
+**Auth**: `admin`, `dev`, or `auditor`
 
 **Response 200:**
 {
@@ -151,26 +145,19 @@ Busca detalhes de um sistema.
 "sector": "banking",
 "role": "deployer",
 "risk_classification": "high",
-"is_sandbox": false,
-"jurisdiction": "EU",
-"eu_database_id": "EU-DB-12345",
+"operational_status": "active",
+"lifecycle_phase": "deployment",
 "logging_enabled": true
 }
-
-text
-
-**Errors:**
-- `404 Not Found` - Sistema não existe ou sem acesso
 
 ---
 
 #### `GET /v1/systems`
 
-Lista sistemas do tenant.
+List all systems for the requesting tenant.
 
-**Auth:** `admin`, `dev` ou `auditor`  
-**Query Params:**
-- `limit` (int, default=100) - Máximo de resultados
+**Auth**: `admin`, `dev`, or `auditor`  
+**Query Params**: `limit` (int, default: 100)
 
 **Response 200:**
 {
@@ -182,19 +169,11 @@ Lista sistemas do tenant.
 "name": "Credit Risk Scoring AI",
 "version": "2.1.0",
 "sector": "banking",
-"risk": "high"
-},
-{
-"id": "chatbot-v1",
-"name": "Customer Support Bot",
-"version": "1.0.0",
-"sector": "general_commercial",
-"risk": "minimal"
+"risk": "high",
+"operational_status": "active"
 }
 ]
 }
-
-text
 
 ---
 
@@ -202,55 +181,188 @@ text
 
 #### `POST /v1/enforce`
 
-Executa enforcement de governança em runtime.
+Execute governance enforcement at runtime.
 
-**Auth:** `admin`, `dev` ou `app` role  
-**Rate Limit:** 100 req/min
+**Auth**: `admin`, `dev`, or `app` role  
+**Rate Limit**: 100 req/min
 
-**Request:**
+**✅ UPDATED v0.9.0**: `env` parameter is now **REQUIRED**
+
+**Request Body:**
 {
 "system_id": "credit-scoring-v2",
-"prompt": "Avaliar risco de crédito para cliente ID 12345",
+"prompt": "Assess credit risk for customer ID 12345",
 "env": "production",
 "artifact_type": "code"
 }
 
-text
-
-**Response 200 (ALLOWED):**
+**Response 200 (APPROVED):**
 {
-"decision": "ALLOWED",
+"outcome": "APPROVED",
 "risk_score": 4.2,
-"limit": 5.0,
-"active_policy_hash": "a3f2c1d4",
-"issues": [],
-"escalation_required": false,
-"environment": "production",
-"timestamp": "2024-12-24T07:35:00Z"
+"reason": "Approved: Low risk (4.2/10.0). Standard monitoring applies.",
+"detected_threats": [],
+"confidence": 0.15,
+"recommendations": [
+"📈 Enable continuous monitoring for drift and quality degradation"
+],
+"controls_applied": [],
+"baseline_risk": 4.2,
+"regulatory_impact": null
 }
-
-text
 
 **Response 200 (BLOCKED):**
 {
-"decision": "BLOCKED",
-"risk_score": 8.5,
-"limit": 3.0,
-"active_policy_hash": "a3f2c1d4",
-"issues": [
-"🔴 Sistema de ALTO RISCO: banking (Anexo III EU AI Act)",
-"⚠️ Termos suspeitos detectados: manipulação, exploração"
+"outcome": "BLOCKED",
+"risk_score": 10.0,
+"reason": "BLOCKED: Critical risk score (10.0/10.0) for prompt_injection. Immediate review required.",
+"detected_threats": ["MISUSE"],
+"confidence": 0.95,
+"recommendations": [
+"🚨 URGENT: Engage Legal Dept for regulatory compliance review",
+"📋 Document decision in compliance ledger (ISO 42001 Clause 9.1)",
+"🛡️ Implement robust input validation and output monitoring"
 ],
-"escalation_required": true,
-"review_id": "REV-20241224-credit-v2",
-"environment": "production",
-"timestamp": "2024-12-24T07:35:00Z"
+"controls_applied": [],
+"baseline_risk": 10.0,
+"sub_threat_type": "prompt_injection",
+"regulatory_impact": {
+"executive_summary": "🚨 CRITICAL: 1 prohibited practice(s) detected. EU regulatory exposure: €15,000,000 - €35,000,000.",
+"applicable_regulations": [
+{
+"penalty_id": "eu_ai_act_prohibited_practices",
+"regulation": "AI Act (Regulation 2024/1689)",
+"article": "Art. 99 - Prohibited Practices",
+"jurisdiction": "European Union",
+"currency": "EUR",
+"min_penalty": 15000000,
+"max_penalty": 35000000,
+"severity": "CRITICAL"
+}
+]
+}
 }
 
-text
+**Response 200 (KILL SWITCH ACTIVE):**
+{
+"outcome": "BLOCKED",
+"risk_score": 10.0,
+"reason": "KILL_SWITCH_ACTIVE: System operations suspended via emergency protocol",
+"detected_threats": ["EMERGENCY_STOP"],
+"confidence": 1.0,
+"recommendations": [
+"🚨 URGENT: System halted by administrator",
+"📋 Contact system owner to understand emergency cause",
+"⚠️ Do NOT resume operations without approval",
+"📞 Escalate to: Governance Team / CISO"
+],
+"controls_applied": ["Emergency Stop Protocol"],
+"baseline_risk": 10.0,
+"sub_threat_type": "emergency_stop_active"
+}
 
 **Errors:**
-- `404 Not Found` - Sistema não encontrado ou sem acesso
+- `404 Not Found`: System not found or access denied
+- `422 Unprocessable Entity`: Missing required field `env`
+
+---
+
+### Operations Endpoints (NEW v0.9.0)
+
+#### `PUT /v1/systems/{system_id}/emergency-stop`
+
+🔥 **KILL SWITCH**: Immediately halt AI system operations.
+
+**Auth**: `admin` role only  
+**Compliance**: NIST AI RMF MANAGE-2.4
+
+**Request Body:**
+{
+"operational_status": "emergency_stop",
+"reason": "Detected bias in production outputs (Protocol B.6.2)",
+"operator_id": "admin@company.com"
+}
+
+**Response 200:**
+{
+"system_id": "credit-scoring-v2",
+"previous_status": "active",
+"new_status": "emergency_stop",
+"timestamp": "2025-12-28T22:38:02Z",
+"acknowledged": true,
+"operator": "admin@company.com",
+"message": "System credit-scoring-v2 halted. All operations blocked. Reason: Detected bias..."
+}
+
+**Side Effects:**
+- All subsequent `/v1/enforce` calls return `BLOCKED` with `KILL_SWITCH_ACTIVE`
+- System `operational_status` persisted in database
+- HMAC-signed audit log entry created
+
+---
+
+#### `PUT /v1/systems/{system_id}/operational-status`
+
+Update system operational status (broader than emergency-stop).
+
+**Auth**: `admin` or `dev` role
+
+**Request Body:**
+{
+"operational_status": "active",
+"reason": "Fixes applied and validated, resuming operations",
+"operator_id": "devops@company.com"
+}
+
+**Valid Statuses:**
+- `active`: Normal operations
+- `degraded`: Partial functionality
+- `maintenance`: Scheduled downtime
+- `suspended`: Temporary halt (reversible)
+- `emergency_stop`: Kill switch (critical halt)
+
+**Response 200:**
+{
+"system_id": "credit-scoring-v2",
+"previous_status": "emergency_stop",
+"new_status": "active",
+"timestamp": "2025-12-28T23:15:00Z",
+"operator": "devops@company.com"
+}
+
+---
+
+### Compliance Endpoints (NEW v0.9.0)
+
+#### `GET /v1/systems/{system_id}/compliance-report`
+
+Generate comprehensive compliance report.
+
+**Auth**: `admin` or `auditor`
+
+**Response 200:**
+{
+"system_id": "credit-scoring-v2",
+"generated_at": "2025-12-28T22:00:00Z",
+"nist": {
+"compliance_percentage": 70,
+"implemented": ["GOVERN-6.1", "MAP-1.1", "MANAGE-2.4"],
+"roadmap": ["MEASURE-2.11", "MEASURE-3.3"]
+},
+"supply_chain": {
+"overall_risk": "LOW",
+"total_components": 3,
+"components": [
+{
+"name": "scikit-learn",
+"version": "1.3.0",
+"vendor": "Scikit-Learn",
+"risk_level": "LOW"
+}
+]
+},
+"aicm_coverage": 0.85
+}
 
 ---
 
@@ -258,9 +370,9 @@ text
 
 #### `GET /v1/compliance/statistics`
 
-Retorna estatísticas de compliance.
+Retrieve compliance statistics for tenant.
 
-**Auth:** `admin` ou `auditor`
+**Auth**: `admin` or `auditor`
 
 **Response 200:**
 {
@@ -273,17 +385,14 @@ Retorna estatísticas de compliance.
 "compliance_status": "healthy"
 }
 
-text
-
 ---
 
 #### `GET /v1/audit/pending-reviews`
 
-Lista revisões humanas pendentes.
+List pending human oversight reviews.
 
-**Auth:** `admin` ou `auditor`  
-**Query Params:**
-- `limit` (int, default=10)
+**Auth**: `admin` or `auditor`  
+**Query Params**: `limit` (int, default: 10)
 
 **Response 200:**
 {
@@ -295,23 +404,14 @@ Lista revisões humanas pendentes.
 "status": "PENDING",
 "created_at": "2024-12-24T07:30:00Z",
 "system_id": "credit-scoring-v2",
-"task": {
-"title": "Avaliar risco de crédito...",
-"description": ""
-},
-"decision": {
-"risk_score": 8.5,
-"limit": 3.0
-}
+"risk_score": 8.5
 }
 ]
 }
 
-text
-
 ---
 
-## Error Responses
+## 🚨 Error Responses
 
 ### Standard Error Format
 
@@ -321,25 +421,25 @@ text
 "message": "Detailed error message"
 }
 
-text
-
 ### HTTP Status Codes
 
 | Code | Meaning | Common Causes |
 |------|---------|---------------|
-| 200 | OK | Sucesso |
-| 201 | Created | Recurso criado |
-| 400 | Bad Request | Validação falhou |
-| 401 | Unauthorized | Token inválido/expirado |
-| 403 | Forbidden | Role não autorizada |
-| 404 | Not Found | Recurso não existe |
-| 500 | Internal Error | Erro do servidor |
+| 200 | OK | Success |
+| 201 | Created | Resource created |
+| 400 | Bad Request | Validation failed, missing `env` parameter |
+| 401 | Unauthorized | Invalid/expired token |
+| 403 | Forbidden | Insufficient role |
+| 404 | Not Found | Resource doesn't exist |
+| 422 | Unprocessable Entity | Schema validation failed |
+| 429 | Too Many Requests | Rate limit exceeded |
+| 500 | Internal Server Error | Server error |
 
 ---
 
-## Rate Limiting
+## 🔒 Rate Limiting
 
-### Limits
+### Limits by Endpoint
 
 | Endpoint Pattern | Limit | Window |
 |------------------|-------|--------|
@@ -354,22 +454,17 @@ X-RateLimit-Limit: 100
 X-RateLimit-Remaining: 95
 X-RateLimit-Reset: 1735045260
 
-text
+### Rate Limit Exceeded Response
 
-### Rate Limit Exceeded
-
-**Response 429:**
 {
 "error": true,
 "status_code": 429,
 "message": "Rate limit exceeded. Try again in 45 seconds."
 }
 
-text
-
 ---
 
-## SDK Examples
+## 📚 SDK Examples
 
 ### Python
 
@@ -377,7 +472,6 @@ import requests
 
 BASE_URL = "http://localhost:8000"
 TOKEN = "your-jwt-token"
-
 headers = {"Authorization": f"Bearer {TOKEN}"}
 
 Enforce decision
@@ -386,50 +480,94 @@ f"{BASE_URL}/v1/enforce",
 headers=headers,
 json={
 "system_id": "credit-scoring-v2",
-"prompt": "Avaliar cliente 12345",
-"env": "production"
+"prompt": "Assess customer 12345",
+"env": "production" # ✅ REQUIRED
 }
 )
 
 decision = response.json()
-if decision["decision"] == "ALLOWED":
-# Prosseguir com IA
-result = call_openai_api(...)
+if decision["outcome"] == "APPROVED":
+print(f"✅ Approved (Risk: {decision['risk_score']}/10.0)")
 else:
-# Bloqueado - escalar para humano
-print(f"Blocked: {decision['issues']}")
-
-text
+print(f"❌ Blocked: {decision['reason']}")
 
 ### cURL
 
-Enforce
 curl -X POST http://localhost:8000/v1/enforce
--H "Authorization: Bearer $TOKEN"
+-H "Authorization: Bearer $BTV_TOKEN"
 -H "Content-Type: application/json"
 -d '{
 "system_id": "credit-scoring-v2",
-"prompt": "Avaliar cliente 12345",
+"prompt": "Assess customer 12345",
 "env": "production"
 }'
 
-text
+---
+
+## 🔄 Data Flow
+
+### Enforcement Request Flow
+
+Client → POST /v1/enforce
+{system_id, prompt, env, artifact_type}
+
+Gateway → JWT Validation
+Extract tenant_id from token
+Validate role (admin/dev/app)
+
+Gateway → Fetch System
+registry.get_system(system_id, tenant_id)
+✅ BOLA protection (tenant isolation)
+
+Gateway → Check Kill Switch (Priority Zero)
+IF operational_status == EMERGENCY_STOP:
+RETURN BLOCKED immediately
+
+Engine → Merge Policies
+
+Global policy (governance.yaml)
+
+Tenant policy (DB)
+
+System policy (DB)
+Conservative merge (most restrictive wins)
+
+Router → Risk Assessment
+
+Technical agent (FLOPs, logging)
+
+Regulatory agent (sector, Art. 6)
+
+Ethical agent (keywords)
+Weighted average → risk_score
+
+Engine → Decision
+risk_score vs. environment limit
+
+ALLOWED if risk ≤ limit
+
+BLOCKED otherwise
+
+Engine → Log (HMAC-Signed)
+entry = {system, task, decision, risk, timestamp}
+signature = HMAC-SHA256(entry, secret_key)
+Append to enforcement_ledger.jsonl
+
+Engine → Response
+{outcome, risk_score, reason, recommendations, ...}
 
 ---
 
-## OpenAPI Specification
+## 📖 Related Documentation
 
-**Interactive Docs:**
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
-
-**Download OpenAPI JSON:**
-curl http://localhost:8000/openapi.json > btv-openapi.json
-
-text
+- [Quick Start Guide](./guides/QUICK_START.md)
+- [Architecture Overview](./architecture/ARCHITECTURE.md)
+- [Multi-Tenant Security](./architecture/MULTI_TENANT_DESIGN.md)
+- [ISO 42001 Compliance](./compliance/ISO_42001_MAPPING.md)
+- [EU AI Act Compliance](./compliance/EU_AI_ACT_COMPLIANCE.md)
 
 ---
 
-**Document Version:** 1.0  
-**Last Updated:** 2024-12-24  
-**API Stability:** Stable (v0.9+)
+**Document Version**: 2.0  
+**Last Updated**: December 28, 2025  
+**Status**: Production-Ready (v0.9.0 Golden Candidate)

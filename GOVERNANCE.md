@@ -691,9 +691,9 @@ Open Source Initiative for licensing guidance
 Signatures
 Adopted by:
 
-[Your Name], BDFL
+Daniel Lau Pereira Soares, BDFL
 Date: December 26, 2025
-GitHub: @[your-handle]
+GitHub: @danzeroum
 
 This document is version controlled in Git. The canonical version is always at:
 https://github.com/danzeroum/buildtovalue-governance/blob/main/GOVERNANCE.md

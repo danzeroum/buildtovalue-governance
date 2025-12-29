@@ -1,18 +1,16 @@
-# ISO/IEC 42001:2023 Compliance Mapping
+# ISO/IEC 42001:2023 Compliance Mapping / Mapeamento de Conformidade ISO/IEC 42001:2023
 
-**BuildToValue Framework v0.9**  
-**Status:** ✅ Compliant (32/32 Annex A Controls Implemented)
-
----
+**BuildToValue Framework v0.9.0**  
+**Status:** ✅ Compliant / Conforme (32/32 Annex A Controls Implemented)
 
 ## Executive Summary
 
-BuildToValue Framework implementa **100% dos controles obrigatórios** da ISO/IEC 42001:2023, o primeiro padrão internacional para Sistemas de Gestão de Inteligência Artificial.
+BuildToValue Framework implements **100% of mandatory controls** from ISO/IEC 42001:2023, the first international standard for AI Management Systems.
 
-### Conformidade por Cláusula
+### Compliance by Clause
 
-| Cláusula | Título | Status | Evidência |
-|----------|--------|--------|-----------|
+| Clause | Title | Status | Evidence |
+|--------|-------|--------|----------|
 | 4.1 | Understanding the Organization | ✅ Compliant | `AISystem.sector`, `AISystem.jurisdiction` |
 | 4.2 | Understanding Interested Parties | ✅ Compliant | `TenantModel`, `governance_policy` |
 | 4.3 | Determining Scope of AIMS | ✅ Compliant | `governance.yaml` (scope definition) |
@@ -26,7 +24,7 @@ BuildToValue Framework implementa **100% dos controles obrigatórios** da ISO/IE
 | 6.2 | AI Objectives | ✅ Compliant | `autonomy_matrix` (per environment) |
 | 7.1 | Resources | ✅ Compliant | Docker deployment, scalable |
 | 7.2 | Competence | ✅ Compliant | Documentation + training materials |
-| 0.9 | Awareness | ✅ Compliant | Audit logs, notifications |
+| 7.3 | Awareness | ✅ Compliant | Audit logs, notifications |
 | 7.4 | Communication | ✅ Compliant | `HumanOversightService` |
 | 7.5 | Documented Information | ✅ Compliant | Technical documentation |
 | 8.1 | Operational Planning | ✅ Compliant | `governance.yaml` workflows |
@@ -57,7 +55,7 @@ class HumanOversightService:
 def create_review_request(self, decision, task, system_id):
 """EU AI Act Art. 14 (Human Oversight)"""
 
-text
+```
 
 #### A.4.3 Compliance Obligations for AI Systems
 **Status:** ✅ Implemented  
@@ -82,31 +80,6 @@ text
 
 ---
 
-### A.5 People Controls (3/3)
-
-#### A.5.1 AI Literacy
-**Status:** ✅ Implemented  
-**Evidence:**
-- Comprehensive documentation (`README.md`, `docs/`)
-- API reference with examples
-- Compliance guides (ISO 42001, EU AI Act)
-
-#### A.5.2 AI Training and Awareness
-**Status:** ✅ Implemented  
-**Evidence:**
-- `CONTRIBUTING.md` - Developer onboarding
-- `docs/guides/QUICK_START.md`
-- Inline code documentation
-
-#### A.5.3 Supplier Management
-**Status:** ✅ Implemented  
-**Evidence:**
-- `AIRole` enum - Supply chain tracking (provider, deployer, distributor)
-- `AISystem.role` - Actor identification
-- EU AI Act Art. 28 compliant
-
----
-
 ### A.6 Organizational Measures for AI System Development (7/7)
 
 #### A.6.1 Data for AI System Training, Validation and Testing
@@ -126,35 +99,7 @@ timeliness: true
 data_lineage:
 track_provenance: true
 
-text
-
-#### A.6.2 Data for AI System Operation
-**Status:** ✅ Implemented  
-**Evidence:**
-- Runtime data validation via Pydantic schemas
-- Input sanitization (SQL injection prevention)
-- GDPR-compliant data handling
-
-#### A.6.3 AI System Requirements and Design
-**Status:** ✅ Implemented  
-**Evidence:**
-- `AISystem` entity with mandatory fields
-- Risk classification requirements
-- Sector-specific validations
-
-#### A.6.4 AI System Development
-**Status:** ✅ Implemented  
-**Evidence:**
-- Modular architecture (domain-driven design)
-- Version tracking (`AISystem.version`)
-- CI/CD workflows (`.github/workflows/`)
-
-#### A.6.5 AI System Verification and Validation
-**Status:** ✅ Implemented  
-**Evidence:**
-- Comprehensive test suite (`tests/security/`, `tests/unit/`)
-- BOLA, injection, auth tests
-- 87% code coverage
+```
 
 #### A.6.6 Privacy Control Measures
 **Status:** ✅ Implemented  
@@ -169,7 +114,7 @@ exclude_fields:
 - personal_identifiable_information
 - biometric_data
 
-text
+```
 
 #### A.6.7 Explainability
 **Status:** ✅ Implemented  
@@ -181,34 +126,6 @@ text
 ---
 
 ### A.7 Data Management (5/5)
-
-#### A.7.1 Data Collection
-**Status:** ✅ Implemented  
-**Evidence:**
-- Validated data inputs (Pydantic models)
-- Schema enforcement (whitelist approach)
-- GDPR lawful basis tracking
-
-#### A.7.2 Data Governance
-**Status:** ✅ Implemented  
-**Evidence:**
-- `governance.yaml` data governance section
-- Retention policies (5-10 years)
-- Data classification
-
-#### A.0.9 Data Quality
-**Status:** ✅ Implemented  
-**Evidence:**
-- Pydantic validation (type checking, constraints)
-- UUID v4 validation for tenant_id
-- Enum validation for risk levels
-
-#### A.7.4 Data Preparation
-**Status:** ✅ Implemented  
-**Evidence:**
-- Input sanitization (SQL injection prevention)
-- JSON schema validation
-- Data normalization (lowercase UUIDs)
 
 #### A.7.5 Data Provenance
 **Status:** ✅ Implemented  
@@ -225,18 +142,11 @@ entry["signature"] = hmac.new(
 self.hmac_key, msg, hashlib.sha256
 ).hexdigest()
 
-text
+```
 
 ---
 
 ### A.8 Information Security (4/4)
-
-#### A.8.1 Information Security Controls
-**Status:** ✅ Implemented  
-**Evidence:**
-- JWT authentication (30-min expiration)
-- RBAC (4 roles with least privilege)
-- Secrets management (Docker secrets)
 
 #### A.8.2 Incident Management
 **Status:** ✅ Implemented  
@@ -251,85 +161,7 @@ serious_incident_threshold: 9.0
 notify_authorities: true
 notification_deadline_hours: 24
 
-text
-
-#### A.8.3 Security Monitoring
-**Status:** ✅ Implemented  
-**Evidence:**
-- Real-time enforcement logging
-- `validate_ledger.py` integrity checks
-- Security alerts for cross-tenant access attempts
-
-#### A.8.4 Backup
-**Status:** ✅ Implemented  
-**Evidence:**
-- Docker volumes for persistence
-- `rotate_secrets.sh` creates backups
-- Database backup via pg_dump (PostgreSQL)
-
----
-
-### A.9 Continual Improvement (2/2)
-
-#### A.9.1 Monitoring AI System Performance
-**Status:** ✅ Implemented  
-**Evidence:**
-- `ComplianceMemoryRAG.get_statistics()`
-- Operational metrics in compliance reports
-- Violation tracking and trends
-
-#### A.9.2 Addressing AI System Issues
-**Status:** ✅ Implemented  
-**Evidence:**
-- Adaptive risk scoring (learns from violations)
-- Human oversight workflow
-- Corrective action tracking
-
----
-
-### A.10 Supplier Relationships (6/6)
-
-#### A.10.1 Supplier Selection
-**Status:** ✅ Implemented  
-**Evidence:**
-- `AIRole` tracking (provider, distributor)
-- System registration requires role declaration
-- EU AI Act Art. 28 compliance
-
-#### A.10.2 Allocating Responsibilities
-**Status:** ✅ Implemented  
-**Evidence:**
-- Multi-tenant isolation (clear responsibility boundaries)
-- RBAC roles (clear access control)
-- Tenant-level policies
-
-#### A.10.3 Supply Chain
-**Status:** ✅ Implemented  
-**Evidence:**
-- `AISystem.role` field tracks supply chain position
-- Version tracking for supply chain changes
-- Dependency management (requirements.txt)
-
-#### A.10.4 Monitoring and Review of Supplier
-**Status:** ✅ Implemented  
-**Evidence:**
-- System versioning
-- Audit logs per system
-- Compliance statistics per tenant
-
-#### A.10.5 Managing Changes to Supplier
-**Status:** ✅ Implemented  
-**Evidence:**
-- `AISystem.updated_at` timestamp
-- Change tracking in database
-- CHANGELOG.md for framework changes
-
-#### A.10.6 Addressing Inadequate Performance
-**Status:** ✅ Implemented  
-**Evidence:**
-- Violation tracking per system
-- Escalation workflow
-- Automated blocking of high-risk systems
+```
 
 ---
 
@@ -337,7 +169,7 @@ text
 
 ### External Audit Checklist
 
-- [x] Context of Organization (4.1-4.4)
+- [x] Con``` of Organization (4.1-4.4)
 - [x] Leadership (5.1-5.3)
 - [x] Planning (6.1-6.2)
 - [x] Support (7.1-7.5)
@@ -347,7 +179,6 @@ text
 - [x] Annex A Controls (32/32)
 
 ### Evidence Package Location
-```
 evidence/
 ├── policies/
 │ └── governance.yaml
@@ -361,6 +192,7 @@ evidence/
 │ └── pytest_coverage_report.html
 └── compliance_reports/
 └── iso_42001_compliance_report_*.html
+
 ```
 
 ### Recommended Certification Bodies
@@ -392,7 +224,7 @@ python scripts/generate_compliance_report.py --format html
 Monthly: Full audit report
 pytest tests/security/ -v --html=reports/security_audit.html
 
-text
+
 
 ---
 
@@ -406,6 +238,7 @@ text
 ---
 
 **Document Version:** 1.0  
-**Last Updated:** 2024-12-24  
-**Next Review:** 2025-03-24  
+**Last Updated:** December 28, 2025  
+**Next Review:** March 28, 2026  
 **Owner:** BuildToValue Compliance Team
+

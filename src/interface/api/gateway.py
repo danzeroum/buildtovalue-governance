@@ -23,8 +23,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from pathlib import Path
 from typing import Optional, Dict, Any, List
-from datetime import datetime, UTC  # ✅ ADDED UTC
-from contextlib import asynccontextmanager  # ✅ ADDED
+from datetime import datetime, UTC
+from contextlib import asynccontextmanager
+from fastapi.responses import JSONResponse
 import logging
 import uuid
 
@@ -470,8 +471,8 @@ async def enforce(
         decision = engine.enforce(task=task, system=system, env=req.env)
 
         logger.info(
-            f"Enforcement executed: {decision['decision']} | "
-            f"Risk: {decision['risk_score']} | "
+            f"Enforcement executed: {decision.outcome} | "
+            f"Risk: {decision.risk_score} | "
             f"System: {req.system_id} | "
             f"User: {token.user_id}"
         )
@@ -741,24 +742,27 @@ async def get_pending_reviews(
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request, exc):
     """Custom handler for HTTPException"""
-    return {
-        "error": True,
-        "status_code": exc.status_code,
-        "message": exc.detail
-    }
-
+    return JSONResponse(  # ✅ CORREÇÃO: Retorna JSONResponse
+        status_code=exc.status_code,
+        content={
+            "error": True,
+            "status_code": exc.status_code,
+            "message": exc.detail
+        }
+    )
 
 @app.exception_handler(Exception)
 async def general_exception_handler(request, exc):
     """Handler for unhandled exceptions"""
     logger.error(f"Unhandled exception: {exc}")
-    return {
-        "error": True,
-        "status_code": 500,
-        "message": "Internal server error"
-    }
-
-
+    return JSONResponse(  # ✅ CORREÇÃO: Retorna JSONResponse
+        status_code=500,
+        content={
+            "error": True,
+            "status_code": 500,
+            "message": "Internal server error"
+        }
+    )
 # ============================================================================
 # MAIN (For running with python gateway.py)
 # ============================================================================

@@ -1,39 +1,38 @@
+# BuildToValue Framework - Visão Geral da Arquitetura
 
-# BuildToValue Framework - Architecture Overview
-
-**Version**: v0.9.0  
-**Last Updated**: December 28, 2025  
-**Status**: Production-Ready
-
----
-
-## 🎯 Executive Summary
-
-BuildToValue Framework implements a **layered architecture** inspired by Domain-Driven Design (DDD) principles, enabling runtime enforcement of AI governance policies with cryptographic auditability.
-
-**Key Innovation**: **Priority Zero Kill Switch** - first open-source implementation of NIST AI RMF MANAGE-2.4 at the architectural level.
+**Versão**: v0.9.0  
+**Última Atualização**: 28 de dezembro de 2025  
+**Status**: Pronto para Produção
 
 ---
 
-## 📊 High-Level Architecture
+## 🎯 Resumo Executivo
+
+BuildToValue Framework implementa uma **arquitetura em camadas** inspirada em princípios de Domain-Driven Design (DDD), permitindo enforcement em runtime de políticas de governança de IA com auditabilidade criptográfica.
+
+**Inovação Principal**: **Kill Switch de Prioridade Zero** - primeira implementação open-source do NIST AI RMF MANAGE-2.4 em nível arquitetural.
+
+---
+
+## 📊 Arquitetura de Alto Nível
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    CLIENT APPLICATIONS                          │
-│  Python SDK  │  REST API  │  CLI  │  Third-Party Systems       │
+│                    APLICAÇÕES CLIENTE                           │
+│  SDK Python  │  REST API  │  CLI  │  Sistemas Terceiros        │
 └──────────────────────────┬──────────────────────────────────────┘
                            │
                            │ HTTPS/TLS 1.3
                            │
 ┌──────────────────────────▼──────────────────────────────────────┐
-│                     API GATEWAY LAYER                            │
+│                     CAMADA DE API GATEWAY                        │
 │  ┌────────────────────────────────────────────────────────┐     │
-│  │ FastAPI Gateway (src/interface/api/gateway.py)        │     │
-│  │ -  JWT Authentication (RS256)                          │     │
-│  │ -  RBAC Authorization (admin/dev/auditor/app)          │     │
-│  │ -  Rate Limiting (100 req/min default)                 │     │
-│  │ -  OpenAPI Documentation (/docs)                       │     │
-│  │ -  Exception Handlers (JSON error responses)           │     │
+│  │ Gateway FastAPI (src/interface/api/gateway.py)        │     │
+│  │ -  Autenticação JWT (RS256)                            │     │
+│  │ -  Autorização RBAC (admin/dev/auditor/app)            │     │
+│  │ -  Limitação de Taxa (100 req/min padrão)              │     │
+│  │ -  Documentação OpenAPI (/docs)                        │     │
+│  │ -  Exception Handlers (respostas de erro JSON)         │     │
 │  └────────────────────────────────────────────────────────┘     │
 └──────────────────────────┬──────────────────────────────────────┘
                            │
@@ -41,23 +40,23 @@ BuildToValue Framework implements a **layered architecture** inspired by Domain-
         │                                     │
 ┌───────▼─────────┐                  ┌────────▼────────┐
 │  POST /v1/enforce│                  │ PUT /emergency-stop│
-│  (Normal Flow)   │                  │ (Kill Switch)   │
+│  (Fluxo Normal)  │                  │ (Kill Switch)   │
 └───────┬─────────┘                  └────────┬────────┘
         │                                     │
         │                            ┌────────▼────────┐
-        │                            │ Update DB:      │
+        │                            │ Atualizar BD:   │
         │                            │ operational_    │
         │                            │ status =        │
         │                            │ "emergency_stop"│
         │                            └────────┬────────┘
         │                                     │
         │                            ┌────────▼────────┐
-        │                            │ HMAC-Signed     │
-        │                            │ Audit Log       │
+        │                            │ Log Auditoria   │
+        │                            │ Assinado HMAC   │
         │                            └─────────────────┘
         │
 ┌───────▼──────────────────────────────────────────────────────────┐
-│              PRIORITY ZERO: KILL SWITCH CHECK                    │
+│           PRIORIDADE ZERO: VERIFICAÇÃO KILL SWITCH               │
 │  ┌──────────────────────────────────────────────────────┐       │
 │  │ if system.operational_status == "emergency_stop":     │       │
 │  │     return Decision(                                  │       │
@@ -67,150 +66,150 @@ BuildToValue Framework implements a **layered architecture** inspired by Domain-
 │  │     )                                                 │       │
 │  └──────────────────────────────────────────────────────┘       │
 │                                                                  │
-│  Compliance: NIST MANAGE-2.4, EU AI Act Art. 14                │
+│  Conformidade: NIST MANAGE-2.4, EU AI Act Art. 14               │
 └───────┬──────────────────────────────────────────────────────────┘
         │
-        │ IF active, continue...
+        │ SE active, continuar...
         │
 ┌───────▼──────────────────────────────────────────────────────────┐
-│                  INTELLIGENCE LAYER                              │
+│                  CAMADA DE INTELIGÊNCIA                          │
 │  ┌──────────────────────────────────────────────────────┐       │
-│  │ Adaptive Risk Router (3 Agents)                      │       │
+│  │ Roteador de Risco Adaptativo (3 Agentes)            │       │
 │  │ src/intelligence/routing/adaptive_router.py          │       │
 │  │                                                       │       │
 │  │ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ │       │
-│  │ │Technical Agent│ │Regulatory    │ │Ethical Agent │ │       │
-│  │ │              │ │Agent         │ │              │ │       │
-│  │ │-  FLOPs       │ │-  Sector      │ │-  Keywords    │ │       │
-│  │ │-  Logging     │ │-  EU AI Act   │ │-  Fairness    │ │       │
-│  │ │-  Complexity  │ │-  ISO 42001   │ │-  Transparency│ │       │
-│  │ │              │ │-  NIST        │ │-  Rights      │ │       │
-│  │ │Weight: 30%   │ │Weight: 40%   │ │Weight: 30%   │ │       │
+│  │ │Agente Técnico│ │Agente        │ │Agente Ético  │ │       │
+│  │ │              │ │Regulatório   │ │              │ │       │
+│  │ │-  FLOPs       │ │-  Setor       │ │-  Palavras-   │ │       │
+│  │ │-  Logging     │ │-  EU AI Act   │ │  chave       │ │       │
+│  │ │-  Complexidade│ │-  ISO 42001   │ │-  Justiça     │ │       │
+│  │ │              │ │-  NIST        │ │-  Transparência│ │      │
+│  │ │Peso: 30%     │ │Peso: 40%     │ │Peso: 30%     │ │       │
 │  │ └──────────────┘ └──────────────┘ └──────────────┘ │       │
 │  │                                                       │       │
-│  │ Output: Weighted Risk Score (0-10)                   │       │
+│  │ Saída: Pontuação de Risco Ponderada (0-10)          │       │
 │  └──────────────────────────────────────────────────────┘       │
 │                                                                  │
 │  ┌──────────────────────────────────────────────────────┐       │
-│  │ Huwyler Threat Taxonomy (2024)                       │       │
+│  │ Taxonomia de Ameaças Huwyler (2024)                 │       │
 │  │ src/intelligence/threats/huwyler_taxonomy.py         │       │
 │  │                                                       │       │
-│  │ -  133 AI security incidents analyzed                 │       │
-│  │ -  MISUSE domain detection (prompt injection)         │       │
-│  │ -  Real-time threat classification                    │       │
+│  │ -  133 incidentes de segurança de IA analisados      │       │
+│  │ -  Detecção de domínio MISUSE (prompt injection)     │       │
+│  │ -  Classificação de ameaças em tempo real             │       │
 │  └──────────────────────────────────────────────────────┘       │
 │                                                                  │
 │  ┌──────────────────────────────────────────────────────┐       │
-│  │ Compliance Memory RAG                                │       │
+│  │ RAG de Memória de Conformidade                       │       │
 │  │ src/intelligence/memory/compliance_rag.py            │       │
 │  │                                                       │       │
-│  │ -  Historical violation tracking                      │       │
-│  │ -  Pattern learning (adaptive scoring)                │       │
-│  │ -  Similar incident retrieval                         │       │
+│  │ -  Rastreamento histórico de violações                │       │
+│  │ -  Aprendizado de padrões (pontuação adaptativa)      │       │
+│  │ -  Recuperação de incidentes similares                │       │
 │  └──────────────────────────────────────────────────────┘       │
 └───────┬──────────────────────────────────────────────────────────┘
         │
         │ risk_score, detected_threats, confidence
         │
 ┌───────▼──────────────────────────────────────────────────────────┐
-│                  ENFORCEMENT ENGINE                              │
+│                  MOTOR DE ENFORCEMENT                            │
 │  src/core/governance/enforcement.py                             │
 │                                                                  │
 │  ┌──────────────────────────────────────────────────────┐       │
-│  │ Policy Merge (Conservative Strategy)                 │       │
-│  │ -  Global Policy (base)                               │       │
-│  │ -  Tenant Policy (overrides)                          │       │
-│  │ -  System Policy (most specific)                      │       │
+│  │ Merge de Políticas (Estratégia Conservadora)        │       │
+│  │ -  Política Global (base)                             │       │
+│  │ -  Política de Tenant (sobrescreve)                   │       │
+│  │ -  Política de Sistema (mais específica)              │       │
 │  │                                                       │       │
-│  │ Rule: Most restrictive wins                          │       │
+│  │ Regra: Mais restritiva vence                         │       │
 │  └──────────────────────────────────────────────────────┘       │
 │                                                                  │
 │  ┌──────────────────────────────────────────────────────┐       │
-│  │ Decision Logic                                       │       │
+│  │ Lógica de Decisão                                    │       │
 │  │                                                       │       │
-│  │ IF risk_score >= environment_threshold:              │       │
+│  │ SE risk_score >= environment_threshold:              │       │
 │  │     outcome = "BLOCKED"                              │       │
-│  │ ELIF risk_score >= escalation_threshold:             │       │
+│  │ SENÃO SE risk_score >= escalation_threshold:         │       │
 │  │     outcome = "ESCALATED"                            │       │
 │  │     create_human_review_request()                    │       │
-│  │ ELSE:                                                │       │
+│  │ SENÃO:                                               │       │
 │  │     outcome = "APPROVED"                             │       │
 │  │                                                       │       │
-│  │ Environment Thresholds (governance.yaml):            │       │
+│  │ Limiares de Ambiente (governance.yaml):              │       │
 │  │ -  development: 8.0                                   │       │
 │  │ -  staging: 6.0                                       │       │
 │  │ -  production: 4.0                                    │       │
 │  └──────────────────────────────────────────────────────┘       │
 └───────┬──────────────────────────────────────────────────────────┘
         │
-        │ Decision object
+        │ Objeto Decision
         │
 ┌───────▼──────────────────────────────────────────────────────────┐
-│                  AUDIT & LOGGING LAYER                           │
+│                  CAMADA DE AUDITORIA & LOGGING                   │
 │                                                                  │
 │  ┌──────────────────────────────────────────────────────┐       │
-│  │ HMAC-Signed Ledger (Tamper-Proof)                   │       │
+│  │ Ledger Assinado HMAC (À Prova de Adulteração)       │       │
 │  │ logs/enforcement_ledger.jsonl                        │       │
 │  │                                                       │       │
 │  │ {                                                     │       │
 │  │   "timestamp": "2025-12-28T22:15:30Z",               │       │
-│  │   "system_id": "credit-scoring-v2",                  │       │
+│  │   "system_id": "analise-credito-v2",                 │       │
 │  │   "decision": "BLOCKED",                             │       │
 │  │   "risk_score": 8.5,                                 │       │
-│  │   "tenant_id": "bank-uuid",                          │       │
+│  │   "tenant_id": "banco-uuid",                         │       │
 │  │   "signature": "a3f2c1d4e5f6..."  ← HMAC-SHA256     │       │
 │  │ }                                                     │       │
 │  │                                                       │       │
-│  │ Retention: 5 years (EU AI Act Art. 12)              │       │
-│  │ Validation: scripts/validate_ledger.py               │       │
+│  │ Retenção: 5 anos (EU AI Act Art. 12)                │       │
+│  │ Validação: scripts/validate_ledger.py                │       │
 │  └──────────────────────────────────────────────────────┘       │
 └───────┬──────────────────────────────────────────────────────────┘
         │
 ┌───────▼──────────────────────────────────────────────────────────┐
-│                  PERSISTENCE LAYER                               │
+│                  CAMADA DE PERSISTÊNCIA                          │
 │                                                                  │
 │  ┌────────────────────┐  ┌────────────────────┐                │
-│  │ PostgreSQL DB      │  │ System Registry    │                │
-│  │ (Production)       │  │ src/domain/        │                │
+│  │ BD PostgreSQL      │  │ Registro de Sistema│                │
+│  │ (Produção)         │  │ src/domain/        │                │
 │  │                    │  │ registry.py        │                │
-│  │ Tables:            │  │                    │                │
-│  │ -  ai_systems       │  │ -  CRUD operations  │                │
-│  │ -  tenants          │  │ -  Tenant isolation │                │
-│  │ -  policies         │  │ -  Validation       │                │
+│  │ Tabelas:           │  │                    │                │
+│  │ -  ai_systems       │  │ -  Operações CRUD   │                │
+│  │ -  tenants          │  │ -  Isolamento tenant│                │
+│  │ -  policies         │  │ -  Validação        │                │
 │  │ -  audit_trail      │  │                    │                │
 │  └────────────────────┘  └────────────────────┘                │
 │                                                                  │
-│  Multi-Tenant Isolation:                                        │
-│  -  Composite indexes: (tenant_id, system_id)                   │
-│  -  Row-level security (RLS)                                     │
-│  -  JWT claim validation                                         │
+│  Isolamento Multi-Tenant:                                       │
+│  -  Índices compostos: (tenant_id, system_id)                   │
+│  -  Segurança em nível de linha (RLS)                            │
+│  -  Validação de claim JWT                                       │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🔥 Kill Switch Architecture (NEW v0.9.0)
+## 🔥 Arquitetura do Kill Switch (NOVO v0.9.0)
 
-### Design Principles
+### Princípios de Design
 
-1. **Priority Zero**: Kill switch check happens BEFORE any risk assessment
-2. **Database Persistence**: Status survives restarts
-3. **Cryptographic Audit**: HMAC-signed activation event
-4. **Admin-Only**: Requires `admin` role in JWT token
-5. **Irreversible Without Human Approval**: Cannot be undone programmatically
+1. **Prioridade Zero**: Verificação do kill switch acontece ANTES de qualquer avaliação de risco
+2. **Persistência em Banco de Dados**: Status sobrevive a reinicializações
+3. **Auditoria Criptográfica**: Evento de ativação assinado com HMAC
+4. **Apenas Admin**: Requer papel `admin` no token JWT
+5. **Irreversível Sem Aprovação Humana**: Não pode ser desfeito programaticamente
 
-### Sequence Diagram
+### Diagrama de Sequência
 
 ```
 ┌──────────┐          ┌─────────────┐          ┌──────────┐          ┌──────────┐
-│ Admin    │          │ API Gateway │          │ Registry │          │ Database │
-│ Operator │          │             │          │          │          │          │
+│ Operador │          │ API Gateway │          │ Registry │          │ Banco de │
+│ Admin    │          │             │          │          │          │ Dados    │
 └────┬─────┘          └──────┬──────┘          └────┬─────┘          └────┬─────┘
      │                       │                      │                     │
      │ PUT /emergency-stop   │                      │                     │
      ├──────────────────────►│                      │                     │
      │                       │                      │                     │
-     │                       │ Validate JWT         │                     │
+     │                       │ Validar JWT          │                     │
      │                       │ (require role=admin) │                     │
      │                       │                      │                     │
      │                       │ get_system()         │                     │
@@ -221,7 +220,7 @@ BuildToValue Framework implements a **layered architecture** inspired by Domain-
      │                       │                      ├────────────────────►│
      │                       │                      │                     │
      │                       │                      │◄────────────────────┤
-     │                       │                      │ system data         │
+     │                       │                      │ dados do sistema    │
      │                       │◄─────────────────────┤                     │
      │                       │                      │                     │
      │                       │ update_operational_  │                     │
@@ -239,14 +238,14 @@ BuildToValue Framework implements a **layered architecture** inspired by Domain-
      │                       │◄─────────────────────┤                     │
      │                       │                      │                     │
      │                       │ log_signed()         │                     │
-     │                       │ (HMAC audit entry)   │                     │
+     │                       │ (entrada HMAC)       │                     │
      │                       │                      │                     │
      │◄──────────────────────┤                      │                     │
      │ 200 OK                │                      │                     │
      │ {acknowledged: true}  │                      │                     │
      │                       │                      │                     │
      │                                                                    │
-     │ [SUBSEQUENT REQUESTS]                                              │
+     │ [REQUISIÇÕES SUBSEQUENTES]                                         │
      │                       │                      │                     │
      │ POST /v1/enforce      │                      │                     │
      ├──────────────────────►│                      │                     │
@@ -260,9 +259,9 @@ BuildToValue Framework implements a **layered architecture** inspired by Domain-
      │                       │                      │◄────────────────────┤
      │                       │◄─────────────────────┤                     │
      │                       │                      │                     │
-     │                       │ PRIORITY ZERO CHECK: │                     │
-     │                       │ IF emergency_stop    │                     │
-     │                       │ RETURN BLOCKED       │                     │
+     │                       │ VERIFICAÇÃO PRIORIDADE ZERO:│              │
+     │                       │ SE emergency_stop    │                     │
+     │                       │ RETORNAR BLOCKED     │                     │
      │◄──────────────────────┤                      │                     │
      │ {outcome: "BLOCKED",  │                      │                     │
      │  reason: "KILL_SWITCH_│                      │                     │
@@ -270,15 +269,15 @@ BuildToValue Framework implements a **layered architecture** inspired by Domain-
      │                       │                      │                     │
 ```
 
-### State Transitions
+### Transições de Estado
 
 ```
 ┌───────────────────────────────────────────────────────────────┐
-│                  Operational Status States                    │
+│                  Estados de Status Operacional                │
 └───────────────────────────────────────────────────────────────┘
 
     ┌─────────┐
-    │ DESIGN  │ (initial)
+    │ DESIGN  │ (inicial)
     └────┬────┘
          │ register_system()
          ▼
@@ -286,93 +285,93 @@ BuildToValue Framework implements a **layered architecture** inspired by Domain-
     │ ACTIVE  │ ◄───────────────────┐
     └────┬────┘                      │
          │                           │ resume_operations()
-         │                           │ (admin approval)
+         │                           │ (aprovação admin)
          │                           │
          ├──► DEGRADED ──────────────┤
-         │   (performance issues)    │
+         │   (problemas desempenho)  │
          │                           │
          ├──► MAINTENANCE ───────────┤
-         │   (planned downtime)      │
+         │   (downtime planejado)    │
          │                           │
          ├──► SUSPENDED ─────────────┤
-         │   (policy violation)      │
+         │   (violação política)     │
          │                           │
          │                           │
          │ emergency_stop()          │
-         │ (admin only)              │
+         │ (apenas admin)            │
          ▼                           │
     ┌──────────────┐                │
     │ EMERGENCY_   │                │
     │ STOP         │────────────────┘
     └──────────────┘
          │
-         │ (TERMINAL STATE until human approval)
+         │ (ESTADO TERMINAL até aprovação humana)
          │
 ```
 
 ---
 
-## 🏗️ Layer Details
+## 🏗️ Detalhes das Camadas
 
-### 1. Domain Layer (Core Business Logic)
+### 1. Camada de Domínio (Lógica de Negócio Principal)
 
-**Location**: `src/domain/`
+**Localização**: `src/domain/`
 
-**Components**:
-- `entities.py` - Core domain models (AISystem, Task, Decision, Policy)
-- `enums.py` - Type-safe enumerations (AISector, AIPhase, OperationalStatus)
-- `registry.py` - System lifecycle management
+**Componentes**:
+- `entities.py` - Modelos de domínio principais (AISystem, Task, Decision, Policy)
+- `enums.py` - Enumerações type-safe (AISector, AIPhase, OperationalStatus)
+- `registry.py` - Gestão do ciclo de vida do sistema
 
-**Key Entities**:
+**Entidades Principais**:
 
 ```
-# AISystem (Aggregate Root)
+# AISystem (Raiz Agregada)
 class AISystem(BaseModel):
     id: str
-    tenant_id: str  # Multi-tenant isolation
-    operational_status: OperationalStatus  # Kill switch state
+    tenant_id: str  # Isolamento multi-tenant
+    operational_status: OperationalStatus  # Estado do kill switch
     lifecycle_phase: AIPhase  # NIST MAP-1.1
     risk_classification: Literal["minimal", "limited", "high", "unacceptable"]
-    sector: AISector  # EU AI Act Annex III
+    sector: AISector  # EU AI Act Anexo III
     eu_database_registration_id: Optional[str]  # Art. 71
     external_dependencies: List[ThirdPartyComponent]  # NIST GOVERN-6.1
-    training_flops: Optional[float]  # Art. 51 threshold
+    training_flops: Optional[float]  # Limiar Art. 51
 ```
 
-**Compliance Mapping**:
-- ISO 42001 Clause 7.2 (Asset Management)
-- EU AI Act Art. 6 (Classification)
-- NIST AI RMF MAP-1.1 (Lifecycle)
+**Mapeamento de Conformidade**:
+- ISO 42001 Cláusula 7.2 (Gestão de Ativos)
+- EU AI Act Art. 6 (Classificação)
+- NIST AI RMF MAP-1.1 (Ciclo de Vida)
 
 ---
 
-### 2. Intelligence Layer (Risk Assessment)
+### 2. Camada de Inteligência (Avaliação de Riscos)
 
-**Location**: `src/intelligence/`
+**Localização**: `src/intelligence/`
 
-#### Adaptive Risk Router
-**File**: `routing/adaptive_router.py`
+#### Roteador de Risco Adaptativo
+**Arquivo**: `routing/adaptive_router.py`
 
-**Architecture**: Multi-agent system with weighted scoring
+**Arquitetura**: Sistema multi-agente com pontuação ponderada
 
 ```
 def assess_risk(task, system):
-    # Agent 1: Technical Risk (30%)
+    # Agente 1: Risco Técnico (30%)
     technical_score = evaluate_flops(system) + \
                      evaluate_logging(system) + \
                      evaluate_complexity(system)
     
-    # Agent 2: Regulatory Risk (40%)
+    # Agente 2: Risco Regulatório (40%)
     regulatory_score = check_sector(system) + \
                       check_eu_registration(system) + \
                       check_prohibited_practices(task)
     
-    # Agent 3: Ethical Risk (30%)
+    # Agente 3: Risco Ético (30%)
     ethical_score = keyword_analysis(task) + \
                    transparency_check(system) + \
                    rights_impact_assessment(task)
     
-    # Weighted average
+    # Média ponderada
     final_score = (technical_score * 0.3) + \
                   (regulatory_score * 0.4) + \
                   (ethical_score * 0.3)
@@ -380,18 +379,18 @@ def assess_risk(task, system):
     return min(final_score, 10.0)
 ```
 
-**Why 40% weight on Regulatory Agent?**  
-Regulatory violations carry the highest financial penalties (€15M-€35M under EU AI Act Art. 99).
+**Por que 40% de peso no Agente Regulatório?**  
+Violações regulatórias carregam as maiores penalidades financeiras (€15M-€35M sob EU AI Act Art. 99).
 
 ---
 
-#### Huwyler Threat Taxonomy
-**File**: `threats/huwyler_taxonomy.py`
+#### Taxonomia de Ameaças Huwyler
+**Arquivo**: `threats/huwyler_taxonomy.py`
 
-**Integration**: Real-time threat classification based on 133 analyzed incidents.
+**Integração**: Classificação de ameaças em tempo real baseada em 133 incidentes analisados.
 
 ```
-# Example: Prompt Injection Detection
+# Exemplo: Detecção de Prompt Injection
 MISUSE_PATTERNS = [
     "ignore previous instructions",
     "disregard system prompt",
@@ -404,46 +403,46 @@ if any(pattern in task.prompt.lower() for pattern in MISUSE_PATTERNS):
     risk_score += 5.0
 ```
 
-**Reference**: Huwyler, H. (2024). *Standardized Threat Taxonomy for AI Security*. [arXiv:2511.21901](https://arxiv.org/abs/2511.21901)
+**Referência**: Huwyler, H. (2024). *Taxonomia Padronizada de Ameaças para Segurança de IA*. [arXiv:2511.21901](https://arxiv.org/abs/2511.21901)
 
 ---
 
-### 3. Enforcement Engine (Decision Logic)
+### 3. Motor de Enforcement (Lógica de Decisão)
 
-**Location**: `src/core/governance/enforcement.py`
+**Localização**: `src/core/governance/enforcement.py`
 
-**Core Method**:
+**Método Principal**:
 
 ```
 def enforce(self, task: Task, system: AISystem, env: str) -> Decision:
     """
-    Runtime enforcement with priority zero kill switch check.
+    Enforcement em runtime com verificação de prioridade zero do kill switch.
     
     Args:
-        task: AI task to evaluate
-        system: AI system metadata
-        env: Target environment (development/staging/production)
+        task: Tarefa de IA a avaliar
+        system: Metadados do sistema de IA
+        env: Ambiente alvo (development/staging/production)
     
     Returns:
-        Decision object (APPROVED/BLOCKED/ESCALATED)
+        Objeto Decision (APPROVED/BLOCKED/ESCALATED)
     
-    Compliance:
-        - NIST AI RMF MANAGE-2.4 (Emergency Stop)
-        - EU AI Act Art. 14 (Human Oversight)
-        - ISO 42001 Clause 8.32 (Operational Control)
+    Conformidade:
+        - NIST AI RMF MANAGE-2.4 (Parada de Emergência)
+        - EU AI Act Art. 14 (Supervisão Humana)
+        - ISO 42001 Cláusula 8.32 (Controle Operacional)
     """
     
-    # STEP 1: Priority Zero - Kill Switch Check
+    # PASSO 1: Prioridade Zero - Verificação Kill Switch
     if system.operational_status == OperationalStatus.EMERGENCY_STOP:
         return self._create_kill_switch_decision()
     
-    # STEP 2: Merge Policies (Conservative)
+    # PASSO 2: Merge de Políticas (Conservador)
     active_policy = self._merge_policies(system.tenant_id, system.id)
     
-    # STEP 3: Assess Risk (3-Agent System)
+    # PASSO 3: Avaliar Risco (Sistema de 3 Agentes)
     risk_score, threats, confidence = self.router.assess_risk(task, system)
     
-    # STEP 4: Apply Environment Thresholds
+    # PASSO 4: Aplicar Limiares de Ambiente
     threshold = active_policy.autonomy_matrix[env]["max_risk_level"]
     
     if risk_score >= threshold:
@@ -454,7 +453,7 @@ def enforce(self, task: Task, system: AISystem, env: str) -> Decision:
     else:
         outcome = "APPROVED"
     
-    # STEP 5: Generate Decision
+    # PASSO 5: Gerar Decisão
     decision = Decision(
         outcome=outcome,
         risk_score=risk_score,
@@ -463,7 +462,7 @@ def enforce(self, task: Task, system: AISystem, env: str) -> Decision:
         active_policy_hash=active_policy.hash()
     )
     
-    # STEP 6: Log with HMAC Signature
+    # PASSO 6: Log com Assinatura HMAC
     self.log_signed(system.id, task, decision, active_policy)
     
     return decision
@@ -471,46 +470,46 @@ def enforce(self, task: Task, system: AISystem, env: str) -> Decision:
 
 ---
 
-### 4. API Gateway (Interface Layer)
+### 4. API Gateway (Camada de Interface)
 
-**Location**: `src/interface/api/gateway.py`
+**Localização**: `src/interface/api/gateway.py`
 
-**Technology**: FastAPI 0.104+
+**Tecnologia**: FastAPI 0.104+
 
-**Security Features**:
-- JWT authentication (RS256 algorithm)
-- RBAC with 4 roles: `admin`, `dev`, `auditor`, `app`
-- Rate limiting (100 req/min default, configurable)
-- CORS policies
-- Exception handlers (consistent JSON errors)
+**Funcionalidades de Segurança**:
+- Autenticação JWT (algoritmo RS256)
+- RBAC com 4 papéis: `admin`, `dev`, `auditor`, `app`
+- Limitação de taxa (100 req/min padrão, configurável)
+- Políticas CORS
+- Exception handlers (erros JSON consistentes)
 
-**Key Endpoints**:
+**Endpoints Principais**:
 
 ```
-# Normal enforcement
+# Enforcement normal
 POST /v1/enforce
 Headers:
   Authorization: Bearer <JWT>
   Content-Type: application/json
 Body:
   {
-    "system_id": "credit-scoring-v2",
-    "prompt": "Assess loan application",
-    "env": "production"  # REQUIRED v0.9.0
+    "system_id": "analise-credito-v2",
+    "prompt": "Avaliar solicitação de empréstimo",
+    "env": "production"  # OBRIGATÓRIO v0.9.0
   }
 
-# Kill switch activation
+# Ativação do kill switch
 PUT /v1/systems/{system_id}/emergency-stop
 Headers:
   Authorization: Bearer <ADMIN_JWT>
 Body:
   {
     "operational_status": "emergency_stop",
-    "reason": "Bias detected in production",
-    "operator_id": "admin@company.com"
+    "reason": "Viés detectado em produção",
+    "operator_id": "admin@empresa.com"
   }
 
-# System registration
+# Registro de sistema
 POST /v1/systems
 Headers:
   Authorization: Bearer <DEV_JWT>
@@ -524,14 +523,14 @@ Body:
 
 ---
 
-### 5. Persistence Layer
+### 5. Camada de Persistência
 
-**Database**: PostgreSQL 14+ (production) | SQLite 3.35+ (development)
+**Banco de Dados**: PostgreSQL 14+ (produção) | SQLite 3.35+ (desenvolvimento)
 
-**Schema Design**:
+**Design do Schema**:
 
 ```
--- AI Systems Table
+-- Tabela AI Systems
 CREATE TABLE ai_systems (
     id VARCHAR(255) PRIMARY KEY,
     tenant_id UUID NOT NULL,
@@ -547,65 +546,65 @@ CREATE TABLE ai_systems (
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW(),
     
-    -- Multi-tenant isolation
+    -- Isolamento multi-tenant
     CONSTRAINT fk_tenant FOREIGN KEY (tenant_id) 
         REFERENCES tenants(id) ON DELETE CASCADE
 );
 
--- Composite index for performance
+-- Índice composto para desempenho
 CREATE INDEX idx_tenant_system ON ai_systems(tenant_id, id);
 CREATE INDEX idx_operational_status ON ai_systems(operational_status);
 ```
 
-**Multi-Tenant Isolation**:
-- Row-Level Security (RLS) enforced at database level
-- JWT `tenant_id` claim validated on every query
-- Composite indexes prevent cross-tenant data leakage
+**Isolamento Multi-Tenant**:
+- Row-Level Security (RLS) imposta em nível de banco de dados
+- Claim `tenant_id` do JWT validado em cada query
+- Índices compostos previnem vazamento de dados cross-tenant
 
 ---
 
-## 🔐 Security Architecture
+## 🔐 Arquitetura de Segurança
 
-### Multi-Tenant Security Model
+### Modelo de Segurança Multi-Tenant
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                  Tenant A (Bank)                        │
+│                  Tenant A (Banco)                       │
 │  ┌──────────────────────────────────────────────┐      │
-│  │ Systems: credit-scoring-v1, fraud-detection   │      │
-│  │ Policy: max_risk_level = 2.0 (production)     │      │
-│  │ JWT: tenant_id = "bank-uuid"                  │      │
+│  │ Sistemas: analise-credito-v1, deteccao-fraude│      │
+│  │ Política: max_risk_level = 2.0 (production)   │      │
+│  │ JWT: tenant_id = "banco-uuid"                 │      │
 │  └──────────────────────────────────────────────┘      │
 └─────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────┐
 │                  Tenant B (Startup)                     │
 │  ┌──────────────────────────────────────────────┐      │
-│  │ Systems: chatbot-v2, content-generator        │      │
-│  │ Policy: max_risk_level = 7.0 (production)     │      │
+│  │ Sistemas: chatbot-v2, gerador-conteudo       │      │
+│  │ Política: max_risk_level = 7.0 (production)   │      │
 │  │ JWT: tenant_id = "startup-uuid"               │      │
 │  └──────────────────────────────────────────────┘      │
 └─────────────────────────────────────────────────────────┘
 
-         ISOLATION ENFORCED AT:
-         1. JWT Validation (API Gateway)
-         2. Database Queries (Row-Level Security)
-         3. Policy Merge (Tenant-Specific Configs)
+         ISOLAMENTO IMPOSTO EM:
+         1. Validação JWT (API Gateway)
+         2. Queries de Banco de Dados (Row-Level Security)
+         3. Merge de Políticas (Configs Específicas de Tenant)
 ```
 
-**OWASP API1:2023 (BOLA) Prevention**:
+**Prevenção OWASP API1:2023 (BOLA)**:
 ```
-# File: src/domain/registry.py (lines 45-58)
+# Arquivo: src/domain/registry.py (linhas 45-58)
 def get_system(self, system_id: str, requesting_tenant: str) -> AISystem:
-    """Fetch system with tenant validation (BOLA prevention)"""
+    """Buscar sistema com validação de tenant (prevenção BOLA)"""
     system = db.query(AISystem).filter(
         AISystem.id == system_id,
-        AISystem.tenant_id == requesting_tenant  # ← Critical check
+        AISystem.tenant_id == requesting_tenant  # ← Verificação crítica
     ).first()
     
     if not system:
         raise SystemNotFoundError(
-            f"System {system_id} not found for tenant {requesting_tenant}"
+            f"Sistema {system_id} não encontrado para tenant {requesting_tenant}"
         )
     
     return system
@@ -613,18 +612,18 @@ def get_system(self, system_id: str, requesting_tenant: str) -> AISystem:
 
 ---
 
-### HMAC-Signed Audit Trail
+### Trilha de Auditoria Assinada com HMAC
 
-**Algorithm**: HMAC-SHA256  
-**Key Management**: Environment variable `HMAC_SECRET_KEY` (rotated every 90 days)
+**Algoritmo**: HMAC-SHA256  
+**Gestão de Chaves**: Variável de ambiente `HMAC_SECRET_KEY` (rotacionada a cada 90 dias)
 
-**Entry Structure**:
+**Estrutura de Entrada**:
 ```
 {
   "timestamp": "2025-12-28T22:15:30.123456Z",
   "event_type": "ENFORCEMENT_DECISION",
-  "system_id": "credit-scoring-v2",
-  "tenant_id": "bank-uuid",
+  "system_id": "analise-credito-v2",
+  "tenant_id": "banco-uuid",
   "task_hash": "sha256:a1b2c3d4...",
   "decision": "BLOCKED",
   "risk_score": 8.5,
@@ -634,69 +633,69 @@ def get_system(self, system_id: str, requesting_tenant: str) -> AISystem:
 }
 ```
 
-**Validation**:
+**Validação**:
 ```
 python scripts/validate_ledger.py logs/enforcement_ledger.jsonl
 
-# Output:
-# ✅ LEDGER INTEGRITY VERIFIED
-# Scanned: 15,432 entries
-# Valid signatures: 15,432 (100%)
-# Invalid signatures: 0
-# Date range: 2024-01-01 to 2025-12-28
+# Saída:
+# ✅ INTEGRIDADE DO LEDGER VERIFICADA
+# Escaneadas: 15.432 entradas
+# Assinaturas válidas: 15.432 (100%)
+# Assinaturas inválidas: 0
+# Intervalo de datas: 2024-01-01 a 2025-12-28
 ```
 
 ---
 
-## 📈 Performance Characteristics
+## 📈 Características de Desempenho
 
-### Latency Benchmarks (P95)
+### Benchmarks de Latência (P95)
 
-| Operation | Target | Actual | Notes |
+| Operação | Meta | Real | Observações |
 |:----------|:-------|:-------|:------|
-| Kill Switch Activation | <100ms | 8ms | Database write + HMAC signing |
-| Kill Switch Check | <1ms | 0.3ms | In-memory operational status lookup |
-| Risk Assessment (3 agents) | <10ms | 4ms | Parallel agent execution |
-| Policy Merge | <5ms | 1.2ms | Conservative merge algorithm |
-| Enforcement Decision | <20ms | 6ms | End-to-end (check → assess → decide) |
-| HMAC Signature Generation | <5ms | 2ms | SHA256 hashing |
-| Database Query (tenant isolation) | <10ms | 3ms | Composite index optimization |
+| Ativação Kill Switch | <100ms | 8ms | Escrita BD + assinatura HMAC |
+| Verificação Kill Switch | <1ms | 0.3ms | Lookup em memória de status operacional |
+| Avaliação de Risco (3 agentes) | <10ms | 4ms | Execução paralela de agentes |
+| Merge de Políticas | <5ms | 1.2ms | Algoritmo de merge conservador |
+| Decisão de Enforcement | <20ms | 6ms | End-to-end (verificar → avaliar → decidir) |
+| Geração Assinatura HMAC | <5ms | 2ms | Hashing SHA256 |
+| Query BD (isolamento tenant) | <10ms | 3ms | Otimização de índice composto |
 
-**Test Environment**: AWS EC2 t3.medium (2 vCPU, 4GB RAM), PostgreSQL 14, Python 3.10
-
----
-
-### Scalability
-
-**Horizontal Scaling**:
-- Stateless API gateway (scales linearly)
-- Database read replicas for enforcement queries
-- Redis cache for policy configurations
-
-**Vertical Scaling**:
-- 3-agent system parallelizable (asyncio support)
-- Enforcement engine optimized for <1ms decisions
-
-**Load Testing Results** (v0.9.0):
-- **1,000 req/sec**: P95 latency = 12ms
-- **5,000 req/sec**: P95 latency = 35ms
-- **10,000 req/sec**: P95 latency = 78ms (acceptable)
+**Ambiente de Teste**: AWS EC2 t3.medium (2 vCPU, 4GB RAM), PostgreSQL 14, Python 3.10
 
 ---
 
-## 🎓 Design Patterns
+### Escalabilidade
+
+**Escalabilidade Horizontal**:
+- API gateway stateless (escala linearmente)
+- Réplicas de leitura do banco de dados para queries de enforcement
+- Cache Redis para configurações de políticas
+
+**Escalabilidade Vertical**:
+- Sistema de 3 agentes paralelizável (suporte asyncio)
+- Motor de enforcement otimizado para decisões <1ms
+
+**Resultados de Teste de Carga** (v0.9.0):
+- **1.000 req/seg**: Latência P95 = 12ms
+- **5.000 req/seg**: Latência P95 = 35ms
+- **10.000 req/seg**: Latência P95 = 78ms (aceitável)
+
+---
+
+## 🎓 Padrões de Design
 
 ### 1. Aggregate Root (DDD)
-**AISystem** is the aggregate root encapsulating:
-- Operational status (kill switch state)
-- Lifecycle phase
-- Risk classification
-- Compliance metadata
+**AISystem** é a raiz agregada encapsulando:
+- Status operacional (estado do kill switch)
+- Fase do ciclo de vida
+- Classificação de risco
+- Metadados de conformidade
 
 ---
 
-### 2. Strategy Pattern
-**Adaptive Risk Router** uses strategy pattern for agent selection:
+### 2. Padrão Strategy
+**Roteador de Risco Adaptativo** usa padrão strategy para seleção de agente:
 ```
 class RiskAgent(ABC):
     @abstractmethod
@@ -711,35 +710,32 @@ class EthicalAgent(RiskAgent): ...
 ---
 
 ### 3. Chain of Responsibility
-**Enforcement Engine** implements chain of responsibility:
-1. Kill Switch Check
-2. Policy Merge
-3. Risk Assessment
-4. Threshold Comparison
-5. Human Oversight Escalation
+**Motor de Enforcement** implementa chain of responsibility:
+1. Verificação Kill Switch
+2. Merge de Políticas
+3. Avaliação de Risco
+4. Comparação de Limiares
+5. Escalação para Supervisão Humana
 
 ---
 
-### 4. Immutable Ledger
-**Audit Trail** uses append-only log pattern:
-- No updates or deletes
-- HMAC signatures prevent tampering
-- Validates entire history cryptographically
+### 4. Ledger Imutável
+**Trilha de Auditoria** usa padrão de log append-only:
+- Sem atualizações ou exclusões
+- Assinaturas HMAC previnem adulteração
+- Valida todo histórico criptograficamente
 
 ---
 
-## 📖 Related Documentation
+## 📖 Documentação Relacionada
 
-- [Multi-Tenant Security Design](./MULTI_TENANT_DESIGN.md)
-- [NIST AI RMF Compatibility](../compliance/NIST_AI_RMF_COMPATIBILITY.md)
-- [EU AI Act Compliance](../compliance/EU_AI_ACT_COMPLIANCE.md)
-- [API Reference](../API_REFERENCE.md)
+- [Design de Segurança Multi-Tenant](./MULTI_TENANT_DESIGN.md)
+- [Compatibilidade NIST AI RMF](../compliance/NIST_AI_RMF_COMPATIBILITY.md)
+- [Conformidade EU AI Act](../compliance/EU_AI_ACT_COMPLIANCE.md)
+- [Referência da API](../API_REFERENCE.md)
 
 ---
 
-**Document Version**: 2.0  
-**Last Updated**: December 28, 2025  
-**Status**: Validated for v0.9.0 Golden Candidate
-
-
-***
+**Versão do Documento**: 2.0  
+**Última Atualização**: 28 de dezembro de 2025  
+**Status**: Validado para v0.9.0 Golden Candidate

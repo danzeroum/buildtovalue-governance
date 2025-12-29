@@ -404,7 +404,8 @@ class EnforcementEngine:
             self,
             task: Task,
             system: AISystem,
-            issues: Optional[List[str]] = None
+            issues: Optional[List[str]] = None,
+            env: str = "production"
     ) -> Decision:
         """Enforce governance policy with regulatory impact assessment."""
 

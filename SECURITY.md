@@ -430,7 +430,7 @@ We maintain a list of security researchers who have contributed to BuildToValue'
 
 This security policy is part of the BuildToValue Framework, licensed under Apache 2.0.
 
-**Open Source Commitment:** All core security features (HMAC Ledger, Kill Switch, Threat Taxonomy, Multi-Tenant Isolation) are 100% Open Source. See [PRODUCT_SCOPE.md](./PRODUCT_SCOPE.md) for details.
+**Open Source Commitment:** All core security features (HMAC Ledger, Kill Switch, Threat Taxonomy, Multi-Tenant Isolation) are 100% Open Source. See [PRODUCT_SCOPE.md](PRODUCT_SCOPE.pt.md) for details.
 
 ---
 
