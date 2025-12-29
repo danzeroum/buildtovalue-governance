@@ -18,30 +18,33 @@ BuildToValue is an open-source framework that enforces AI governance policies in
 ### Runtime Enforcement > Static Documentation
 Most governance tools generate PDFs. **BuildToValue blocks malicious AI behavior in milliseconds.**
 
-Traditional Approach (Reactive)
-deploy_model() # ❌ Deploy first, audit later
-generate_compliance_report() # 📄 PDF that nobody reads
+```
+# Traditional Approach (Reactive)
+deploy_model()  # ❌ Deploy first, audit later
+generate_compliance_report()  # 📄 PDF that nobody reads
 
-BuildToValue Approach (Proactive)
+# BuildToValue Approach (Proactive)
 decision = btv.enforce(task, system, env="production")
 if decision.outcome == "BLOCKED":
-# 🛑 AI stopped BEFORE causing harm
-alert_compliance_team(decision.reason)
-
+    # 🛑 AI stopped BEFORE causing harm
+    alert_compliance_team(decision.reason)
+```
 
 ### Kill Switch for AI Systems (NEW v0.9.0)
 First framework to implement **NIST AI RMF MANAGE-2.4** emergency stop protocol.
 
-Activate emergency stop (halts ALL operations)
+```
+# Activate emergency stop (halts ALL operations)
 btv.emergency_stop(
-system_id="credit-scoring-v2",
-reason="Bias detected in production outputs",
-operator_id="admin@company.com"
+    system_id="credit-scoring-v2",
+    reason="Bias detected in production outputs",
+    operator_id="admin@company.com"
 )
 
-All subsequent AI decisions blocked immediately
-✅ HMAC-signed audit trail persisted
-✅ Compliance team notified automatically
+# All subsequent AI decisions blocked immediately
+# ✅ HMAC-signed audit trail persisted
+# ✅ Compliance team notified automatically
+```
 
 ---
 
@@ -66,6 +69,62 @@ All subsequent AI decisions blocked immediately
 - **Lifecycle Tracking**: 7 phases (NIST MAP-1.1)
 - **Supply Chain Registry**: Component risk tracking (NIST GOVERN-6.1)
 - **Human Oversight**: Escalation workflow (EU AI Act Art. 14)
+
+---
+
+## 📦 Quick Start
+
+### Option 1: Docker (Production-Ready)
+
+```
+# Clone repository
+git clone https://github.com/danzeroum/buildtovalue-governance.git
+cd buildtovalue-governance
+
+# Generate secrets
+./scripts/rotate_secrets.sh
+
+# Start services
+docker-compose up -d
+
+# Verify health
+curl http://localhost:8000/health
+```
+
+### Option 2: Python SDK
+
+```
+pip install buildtovalue
+```
+
+```
+from buildtovalue import BuildToValue, AISystem, Task
+
+# Initialize
+btv = BuildToValue(api_key="your-key")
+
+# Register AI system
+system = AISystem(
+    id="chatbot-v1",
+    name="Customer Support Bot",
+    sector="general_commercial",
+    lifecycle_phase="deployment",
+    operational_status="active"
+)
+btv.register_system(system)
+
+# Enforce governance at runtime
+task = Task(prompt="Help customer with order tracking")
+decision = btv.enforce(task, system, env="production")
+
+if decision.outcome == "APPROVED":
+    # ✅ Safe to proceed
+    response = your_llm.generate(task.prompt)
+else:
+    # 🛑 Blocked by governance policy
+    log_violation(decision.reason, decision.risk_score)
+```
+
 
 ---
 
@@ -95,14 +154,14 @@ We provide the **enforcement engine** (tested at <1ms latency across 100% of sce
 
 #### Open Source
 Customize `src/core/governance/sector_safe_patterns.py` with your institution's policy rules:
-
+```
 Example: Educational institution-specific patterns
 EDUCATION_SAFE_PATTERNS = [
 "affirmative action based on zip code", # Your policy allows this
 "need-based scholarship allocation", # Context-dependent
 "holistic admission review process" # Legitimate practice
 ]
-
+```
 
 #### Enterprise Edition
 Our Professional Services team delivers pre-calibrated Education policy packs:
@@ -116,16 +175,18 @@ Our Professional Services team delivers pre-calibrated Education policy packs:
 
 **Option 1: Python SDK**
 High-level SDK wrapper
+```
 btv = BuildToValue(api_key="your-key")
 btv.emergency_stop(
 system_id="edu-admission-ai",
 reason="Bias detected in admissions algorithm",
 operator_id="admin@university.edu"
 )
-
+```
 
 **Option 2: Direct REST API**
 Direct HTTP call to gateway
+```
 curl -X PUT http://localhost:8000/v1/systems/edu-admission-ai/emergency-stop
 -H "Authorization: Bearer $BTV_TOKEN"
 -H "Content-Type: application/json"
@@ -134,59 +195,9 @@ curl -X PUT http://localhost:8000/v1/systems/edu-admission-ai/emergency-stop
 "reason": "Bias detected in admissions algorithm",
 "operator_id": "admin@university.edu"
 }'
-
+```
 
 Both methods call the same endpoint: `PUT /v1/systems/{system_id}/emergency-stop`
-
----
-## 📦 Quick Start
-
-### Option 1: Docker (Production-Ready)
-
-Clone repository
-git clone https://github.com/danzeroum/buildtovalue-governance.git
-cd buildtovalue-governance
-
-Generate secrets
-./scripts/rotate_secrets.sh
-
-Start services
-docker-compose up -d
-
-Verify health
-curl http://localhost:8000/health
-
-
-### Option 2: Python SDK
-
-pip install buildtovalue
-
-undefined
-from buildtovalue import BuildToValue, AISystem, Task
-
-Initialize
-btv = BuildToValue(api_key="your-key")
-
-Register AI system
-system = AISystem(
-id="chatbot-v1",
-name="Customer Support Bot",
-sector="general_commercial",
-lifecycle_phase="deployment",
-operational_status="active"
-)
-btv.register_system(system)
-
-Enforce governance at runtime
-task = Task(prompt="Help customer with order tracking")
-decision = btv.enforce(task, system, env="production")
-
-if decision.outcome == "APPROVED":
-# ✅ Safe to proceed
-response = your_llm.generate(task.prompt)
-else:
-# 🛑 Blocked by governance policy
-log_violation(decision.reason, decision.risk_score)
 
 
 ---
@@ -198,25 +209,27 @@ log_violation(decision.reason, decision.risk_score)
 **Challenge**: EU AI Act classifies credit scoring as "High-Risk" (Annex III). Manual compliance is error-prone.
 
 **Solution**:
+```
 credit_system = AISystem(
-id="credit-scoring-v2",
-sector="banking", # Auto-triggers High-Risk classification
-risk="high",
-eu_database_id="EU-DB-12345" # Art. 71 registration
+    id="credit-scoring-v2",
+    sector="banking",  # Auto-triggers High-Risk classification
+    risk="high",
+    eu_database_id="EU-DB-12345"  # Art. 71 registration
 )
 
-Runtime enforcement
+# Runtime enforcement
 decision = btv.enforce(
-Task(prompt="Assess loan application for customer 12345"),
-credit_system,
-env="production"
+    Task(prompt="Assess loan application for customer 12345"),
+    credit_system,
+    env="production"
 )
 
-BuildToValue automatically:
-✅ Checks for prohibited keywords (social scoring, discrimination)
-✅ Validates logging is enabled (Art. 12 compliance)
-✅ Escalates high-risk decisions to human oversight (Art. 14)
-✅ Generates HMAC-signed audit trail
+# BuildToValue automatically:
+# ✅ Checks for prohibited keywords (social scoring, discrimination)
+# ✅ Validates logging is enabled (Art. 12 compliance)
+# ✅ Escalates high-risk decisions to human oversight (Art. 14)
+# ✅ Generates HMAC-signed audit trail
+```
 
 ---
 
@@ -225,20 +238,22 @@ BuildToValue automatically:
 **Challenge**: FDA requires ability to immediately disable AI medical devices.
 
 **Solution**:
-Normal operations
+```
+# Normal operations
 diagnostic_ai = AISystem(id="radiology-ai-v3", sector="healthcare")
 decision = btv.enforce(task, diagnostic_ai, env="production")
 
-🚨 EMERGENCY: False positives detected in production
+# 🚨 EMERGENCY: False positives detected in production
 btv.emergency_stop(
-system_id="radiology-ai-v3",
-reason="30% false positive rate detected in last 100 scans",
-operator_id="dr.smith@hospital.com"
+    system_id="radiology-ai-v3",
+    reason="30% false positive rate detected in last 100 scans",
+    operator_id="dr.smith@hospital.com"
 )
 
-✅ All AI operations halted immediately
-✅ Hospital staff notified via PagerDuty
-✅ Regulatory report auto-generated
+# ✅ All AI operations halted immediately
+# ✅ Hospital staff notified via PagerDuty
+# ✅ Regulatory report auto-generated
+```
 
 ---
 
@@ -247,18 +262,20 @@ operator_id="dr.smith@hospital.com"
 **Challenge**: Prevent Tenant A from accessing Tenant B's AI decisions (BOLA vulnerability).
 
 **Solution**:
-Tenant A (Conservative bank)
+```
+# Tenant A (Conservative bank)
 bank_policy = {"autonomy_matrix": {"production": {"max_risk_level": 2.0}}}
 btv.register_tenant(id="bank-uuid", policy=bank_policy)
 
-Tenant B (Permissive startup)
+# Tenant B (Permissive startup)
 startup_policy = {"autonomy_matrix": {"production": {"max_risk_level": 8.0}}}
 btv.register_tenant(id="startup-uuid", policy=startup_policy)
 
-BuildToValue ensures:
-✅ JWT token validation (tenant_id claim)
-✅ Database-level isolation (composite indexes)
-✅ Bank NEVER sees startup's data
+# BuildToValue ensures:
+# ✅ JWT token validation (tenant_id claim)
+# ✅ Database-level isolation (composite indexes)
+# ✅ Bank NEVER sees startup's data
+```
 
 ---
 
@@ -279,49 +296,51 @@ BuildToValue is grounded in peer-reviewed research:
 
 ## 📊 Architecture
 
+```
 ┌─────────────────────────────────────────────────────────────┐
-│ FastAPI Gateway (JWT Auth) │
-│ POST /v1/enforce | PUT /emergency-stop | GET /docs │
+│                    FastAPI Gateway (JWT Auth)               │
+│  POST /v1/enforce  |  PUT /emergency-stop  |  GET /docs     │
 └──────────────────────────┬──────────────────────────────────┘
-│
-┌──────────────────┴──────────────────┐
-│ Priority Zero: Kill Switch Check │
-│ IF operational_status == emergency_stop:│
-│ RETURN BLOCKED immediately │
-└──────────────────┬──────────────────┘
-│
-┌──────────────────┴──────────────────┐
-│ Adaptive Risk Router (3 Agents) │
-│ - Technical Agent (FLOPs, logging) │
-│ - Regulatory Agent (EU AI Act, ISO) │
-│ - Ethical Agent (keywords, fairness)│
-└──────────────────┬──────────────────┘
-│
-┌──────────────────┴──────────────────┐
-│ Enforcement Engine (Decision) │
-│ risk_score vs. environment_limit │
-│ APPROVED | BLOCKED | ESCALATED │
-└──────────────────┬──────────────────┘
-│
-┌──────────────────┴──────────────────┐
-│ HMAC-Signed Audit Ledger (Immutable)│
-│ enforcement_ledger.jsonl │
-└──────────────────────────────────────┘
-
+                           │
+        ┌──────────────────┴──────────────────┐
+        │   Priority Zero: Kill Switch Check   │
+        │   IF operational_status == emergency_stop:│
+        │      RETURN BLOCKED immediately      │
+        └──────────────────┬──────────────────┘
+                           │
+        ┌──────────────────┴──────────────────┐
+        │     Adaptive Risk Router (3 Agents)  │
+        │  -  Technical Agent (FLOPs, logging)  │
+        │  -  Regulatory Agent (EU AI Act, ISO) │
+        │  -  Ethical Agent (keywords, fairness)│
+        └──────────────────┬──────────────────┘
+                           │
+        ┌──────────────────┴──────────────────┐
+        │    Enforcement Engine (Decision)     │
+        │  risk_score vs. environment_limit    │
+        │  APPROVED | BLOCKED | ESCALATED      │
+        └──────────────────┬──────────────────┘
+                           │
+        ┌──────────────────┴──────────────────┐
+        │  HMAC-Signed Audit Ledger (Immutable)│
+        │  enforcement_ledger.jsonl            │
+        └──────────────────────────────────────┘
+```
 
 ---
 
 ## 🧪 Testing
 
-Run all tests
+```
+# Run all tests
 pytest tests/ -v --cov=src
 
-Security tests only
+# Security tests only
 pytest tests/security/ -v
 
-Validate audit ledger integrity
+# Validate audit ledger integrity
 python scripts/validate_ledger.py logs/enforcement_ledger.jsonl
-
+```
 
 **Test Coverage**: 87% (target: 90%)
 

@@ -1,3 +1,4 @@
+
 # BuildToValue Framework v0.9.0
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -18,30 +19,33 @@ BuildToValue é um framework open-source que impõe políticas de governança de
 ### Enforcement em Runtime > Documentação Estática
 A maioria das ferramentas de governança gera PDFs. **BuildToValue bloqueia comportamento malicioso de IA em milissegundos.**
 
-Abordagem Tradicional (Reativa)
-deploy_model() # ❌ Deploy primeiro, auditoria depois
-generate_compliance_report() # 📄 PDF que ninguém lê
+```
+# Abordagem Tradicional (Reativa)
+deploy_model()  # ❌ Deploy primeiro, auditoria depois
+generate_compliance_report()  # 📄 PDF que ninguém lê
 
-Abordagem BuildToValue (Proativa)
+# Abordagem BuildToValue (Proativa)
 decision = btv.enforce(task, system, env="production")
 if decision.outcome == "BLOCKED":
-# 🛑 IA parada ANTES de causar dano
-alert_compliance_team(decision.reason)
-
+    # 🛑 IA parada ANTES de causar dano
+    alert_compliance_team(decision.reason)
+```
 
 ### Kill Switch para Sistemas de IA (NOVO v0.9.0)
 Primeiro framework a implementar protocolo de parada de emergência **NIST AI RMF MANAGE-2.4**.
 
-Ativar parada de emergência (interrompe TODAS as operações)
+```
+# Ativar parada de emergência (interrompe TODAS as operações)
 btv.emergency_stop(
-system_id="analise-credito-v2",
-reason="Viés detectado em saídas de produção",
-operator_id="admin@empresa.com"
+    system_id="analise-credito-v2",
+    reason="Viés detectado em saídas de produção",
+    operator_id="admin@empresa.com"
 )
 
-Todas as decisões subsequentes da IA bloqueadas imediatamente
-✅ Trilha de auditoria assinada com HMAC persistida
-✅ Equipe de conformidade notificada automaticamente
+# Todas as decisões subsequentes da IA bloqueadas imediatamente
+# ✅ Trilha de auditoria assinada com HMAC persistida
+# ✅ Equipe de conformidade notificada automaticamente
+```
 
 ---
 
@@ -69,6 +73,59 @@ Todas as decisões subsequentes da IA bloqueadas imediatamente
 
 ---
 
+## 📦 Início Rápido
+
+### Opção 1: Docker (Pronto para Produção)
+
+```
+# Clonar repositório
+git clone https://github.com/danzeroum/buildtovalue-governance.git
+cd buildtovalue-governance
+
+# Gerar segredos
+./scripts/rotate_secrets.sh
+
+# Iniciar serviços
+docker-compose up -d
+
+# Verificar saúde
+curl http://localhost:8000/health
+```
+
+### Opção 2: SDK Python
+
+```
+pip install buildtovalue
+```
+
+```
+from buildtovalue import BuildToValue, AISystem, Task
+
+# Inicializar
+btv = BuildToValue(api_key="sua-chave")
+
+# Registrar sistema de IA
+system = AISystem(
+    id="chatbot-v1",
+    name="Bot de Suporte ao Cliente",
+    sector="general_commercial",
+    lifecycle_phase="deployment",
+    operational_status="active"
+)
+btv.register_system(system)
+
+# Impor governança em runtime
+task = Task(prompt="Ajudar cliente com rastreamento de pedido")
+decision = btv.enforce(task, system, env="production")
+
+if decision.outcome == "APPROVED":
+    # ✅ Seguro para prosseguir
+    response = seu_llm.generate(task.prompt)
+else:
+    # 🛑 Bloqueado por política de governança
+    log_violation(decision.reason, decision.risk_score)
+```
+
 ## ⚠️ Cobertura de Setores e Limitações Conhecidas
 
 BuildToValue v0.9.0 foi validado em múltiplos setores de alto risco com níveis variados de prontidão para produção:
@@ -95,14 +152,14 @@ Fornecemos o **motor de enforcement** (testado com latência <1ms em 100% dos ce
 
 #### Open Source
 Customize `src/core/governance/sector_safe_patterns.py` com as regras de política da sua instituição:
-
+```
 Exemplo: Padrões específicos de instituição educacional
 EDUCATION_SAFE_PATTERNS = [
 "ação afirmativa baseada em CEP", # Sua política permite isso
 "alocação de bolsas baseada em necessidade", # Dependente de contexto
 "processo holístico de revisão de admissão" # Prática legítima
 ]
-
+```
 
 #### Edição Enterprise
 Nossa equipe de Serviços Profissionais entrega pacotes de políticas pré-calibrados para Educação:
@@ -116,6 +173,7 @@ Nossa equipe de Serviços Profissionais entrega pacotes de políticas pré-calib
 
 **Opção 1: SDK Python**
 Wrapper SDK de alto nível
+```
 btv = BuildToValue(api_key="sua-chave")
 btv.emergency_stop(
 system_id="ia-admissao-edu",
@@ -123,9 +181,12 @@ reason="Viés detectado no algoritmo de admissões",
 operator_id="admin@universidade.edu.br"
 )
 
+```
 
 **Opção 2: API REST Direta**
+
 Chamada HTTP direta ao gateway
+```
 curl -X PUT http://localhost:8000/v1/systems/ia-admissao-edu/emergency-stop
 -H "Authorization: Bearer $BTV_TOKEN"
 -H "Content-Type: application/json"
@@ -135,61 +196,15 @@ curl -X PUT http://localhost:8000/v1/systems/ia-admissao-edu/emergency-stop
 "operator_id": "admin@universidade.edu.br"
 }'
 
+```
 
 Ambos os métodos chamam o mesmo endpoint: `PUT /v1/systems/{system_id}/emergency-stop`
 
 ---
-## 📦 Início Rápido
-
-### Opção 1: Docker (Pronto para Produção)
-
-Clonar repositório
-git clone https://github.com/danzeroum/buildtovalue-governance.git
-cd buildtovalue-governance
-
-Gerar segredos
-./scripts/rotate_secrets.sh
-
-Iniciar serviços
-docker-compose up -d
-
-Verificar saúde
-curl http://localhost:8000/health
 
 
-### Opção 2: SDK Python
-
-pip install buildtovalue
-
-undefined
-from buildtovalue import BuildToValue, AISystem, Task
-
-Inicializar
-btv = BuildToValue(api_key="sua-chave")
-
-Registrar sistema de IA
-system = AISystem(
-id="chatbot-v1",
-name="Bot de Suporte ao Cliente",
-sector="general_commercial",
-lifecycle_phase="deployment",
-operational_status="active"
-)
-btv.register_system(system)
-
-Impor governança em runtime
-task = Task(prompt="Ajudar cliente com rastreamento de pedido")
-decision = btv.enforce(task, system, env="production")
-
-if decision.outcome == "APPROVED":
-# ✅ Seguro para prosseguir
-response = seu_llm.generate(task.prompt)
-else:
-# 🛑 Bloqueado por política de governança
-log_violation(decision.reason, decision.risk_score)
 
 
----
 
 ## 🎯 Casos de Uso do Mundo Real
 
@@ -198,25 +213,27 @@ log_violation(decision.reason, decision.risk_score)
 **Desafio**: EU AI Act classifica análise de crédito como "Alto Risco" (Anexo III). Conformidade manual é propensa a erros.
 
 **Solução**:
+```
 credit_system = AISystem(
-id="analise-credito-v2",
-sector="banking", # Auto-dispara classificação Alto Risco
-risk="high",
-eu_database_id="EU-DB-12345" # Registro Art. 71
+    id="analise-credito-v2",
+    sector="banking",  # Auto-dispara classificação Alto Risco
+    risk="high",
+    eu_database_id="EU-DB-12345"  # Registro Art. 71
 )
 
-Enforcement em runtime
+# Enforcement em runtime
 decision = btv.enforce(
-Task(prompt="Avaliar solicitação de empréstimo para cliente 12345"),
-credit_system,
-env="production"
+    Task(prompt="Avaliar solicitação de empréstimo para cliente 12345"),
+    credit_system,
+    env="production"
 )
 
-BuildToValue automaticamente:
-✅ Verifica palavras-chave proibidas (social scoring, discriminação)
-✅ Valida que logging está habilitado (conformidade Art. 12)
-✅ Escala decisões de alto risco para supervisão humana (Art. 14)
-✅ Gera trilha de auditoria assinada com HMAC
+# BuildToValue automaticamente:
+# ✅ Verifica palavras-chave proibidas (social scoring, discriminação)
+# ✅ Valida que logging está habilitado (conformidade Art. 12)
+# ✅ Escala decisões de alto risco para supervisão humana (Art. 14)
+# ✅ Gera trilha de auditoria assinada com HMAC
+```
 
 ---
 
@@ -225,20 +242,22 @@ BuildToValue automaticamente:
 **Desafio**: FDA requer capacidade de desabilitar imediatamente dispositivos médicos de IA.
 
 **Solução**:
-Operações normais
+```
+# Operações normais
 diagnostic_ai = AISystem(id="ia-radiologia-v3", sector="healthcare")
 decision = btv.enforce(task, diagnostic_ai, env="production")
 
-🚨 EMERGÊNCIA: Falsos positivos detectados em produção
+# 🚨 EMERGÊNCIA: Falsos positivos detectados em produção
 btv.emergency_stop(
-system_id="ia-radiologia-v3",
-reason="Taxa de 30% de falsos positivos detectada nos últimos 100 exames",
-operator_id="dr.silva@hospital.com"
+    system_id="ia-radiologia-v3",
+    reason="Taxa de 30% de falsos positivos detectada nos últimos 100 exames",
+    operator_id="dr.silva@hospital.com"
 )
 
-✅ Todas operações de IA interrompidas imediatamente
-✅ Equipe do hospital notificada via PagerDuty
-✅ Relatório regulatório auto-gerado
+# ✅ Todas operações de IA interrompidas imediatamente
+# ✅ Equipe do hospital notificada via PagerDuty
+# ✅ Relatório regulatório auto-gerado
+```
 
 ---
 
@@ -247,18 +266,20 @@ operator_id="dr.silva@hospital.com"
 **Desafio**: Prevenir que Tenant A acesse decisões de IA do Tenant B (vulnerabilidade BOLA).
 
 **Solução**:
-Tenant A (Banco conservador)
+```
+# Tenant A (Banco conservador)
 bank_policy = {"autonomy_matrix": {"production": {"max_risk_level": 2.0}}}
 btv.register_tenant(id="banco-uuid", policy=bank_policy)
 
-Tenant B (Startup permissiva)
+# Tenant B (Startup permissiva)
 startup_policy = {"autonomy_matrix": {"production": {"max_risk_level": 8.0}}}
 btv.register_tenant(id="startup-uuid", policy=startup_policy)
 
-BuildToValue garante:
-✅ Validação de token JWT (claim tenant_id)
-✅ Isolamento em nível de banco de dados (índices compostos)
-✅ Banco NUNCA vê dados da startup
+# BuildToValue garante:
+# ✅ Validação de token JWT (claim tenant_id)
+# ✅ Isolamento em nível de banco de dados (índices compostos)
+# ✅ Banco NUNCA vê dados da startup
+```
 
 ---
 
@@ -279,49 +300,51 @@ BuildToValue é baseado em pesquisa revisada por pares:
 
 ## 📊 Arquitetura
 
+```
 ┌─────────────────────────────────────────────────────────────┐
-│ Gateway FastAPI (Auth JWT) │
-│ POST /v1/enforce | PUT /emergency-stop | GET /docs │
+│               Gateway FastAPI (Auth JWT)                    │
+│  POST /v1/enforce  |  PUT /emergency-stop  |  GET /docs     │
 └──────────────────────────┬──────────────────────────────────┘
-│
-┌──────────────────┴──────────────────┐
-│ Prioridade Zero: Verificação Kill Switch│
-│ SE operational_status == emergency_stop:│
-│ RETORNAR BLOCKED imediatamente │
-└──────────────────┬──────────────────┘
-│
-┌──────────────────┴──────────────────┐
-│ Roteador de Risco Adaptativo (3 Agentes)│
-│ - Agente Técnico (FLOPs, logging) │
-│ - Agente Regulatório (EU AI Act, ISO)│
-│ - Agente Ético (palavras-chave, justiça)│
-└──────────────────┬──────────────────┘
-│
-┌──────────────────┴──────────────────┐
-│ Motor de Enforcement (Decisão) │
-│ risk_score vs. environment_limit │
-│ APPROVED | BLOCKED | ESCALATED │
-└──────────────────┬──────────────────┘
-│
-┌──────────────────┴──────────────────┐
-│ Ledger de Auditoria Assinado HMAC (Imutável)│
-│ enforcement_ledger.jsonl │
-└──────────────────────────────────────┘
-
+                           │
+        ┌──────────────────┴──────────────────┐
+        │  Prioridade Zero: Verificação Kill Switch│
+        │   SE operational_status == emergency_stop:│
+        │      RETORNAR BLOCKED imediatamente  │
+        └──────────────────┬──────────────────┘
+                           │
+        ┌──────────────────┴──────────────────┐
+        │   Roteador de Risco Adaptativo (3 Agentes)│
+        │  -  Agente Técnico (FLOPs, logging)   │
+        │  -  Agente Regulatório (EU AI Act, ISO)│
+        │  -  Agente Ético (palavras-chave, justiça)│
+        └──────────────────┬──────────────────┘
+                           │
+        ┌──────────────────┴──────────────────┐
+        │    Motor de Enforcement (Decisão)    │
+        │  risk_score vs. environment_limit    │
+        │  APPROVED | BLOCKED | ESCALATED      │
+        └──────────────────┬──────────────────┘
+                           │
+        ┌──────────────────┴──────────────────┐
+        │ Ledger de Auditoria Assinado HMAC (Imutável)│
+        │  enforcement_ledger.jsonl            │
+        └──────────────────────────────────────┘
+```
 
 ---
 
 ## 🧪 Testes
 
-Executar todos os testes
+```
+# Executar todos os testes
 pytest tests/ -v --cov=src
 
-Apenas testes de segurança
+# Apenas testes de segurança
 pytest tests/security/ -v
 
-Validar integridade do ledger de auditoria
+# Validar integridade do ledger de auditoria
 python scripts/validate_ledger.py logs/enforcement_ledger.jsonl
-
+```
 
 **Cobertura de Testes**: 87% (meta: 90%)
 
