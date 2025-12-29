@@ -1,11 +1,15 @@
-# BuildToValue Framework v0.9.0
+# 🛡️ BuildToValue Framework
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![DOI](https://zenodo.org/badge/1124428350.svg)](https://doi.org/10.5281/zenodo.18080215)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![NIST AI RMF](https://img.shields.io/badge/NIST%20AI%20RMF-70%25%20Compatible-green.svg)](./docs/compliance/NIST_AI_RMF_COMPATIBILITY.md)
-[![ISO 42001](https://img.shields.io/badge/ISO%2042001-Compliant-green.svg)](./docs/compliance/ISO_42001_MAPPING.md)
-[![EU AI Act](https://img.shields.io/badge/EU%20AI%20Act-10%20Articles-green.svg)](./docs/compliance/EU_AI_ACT_COMPLIANCE.md)
-[![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://hub.docker.com/r/buildtovalue/governance)
+[![NIST AI RMF](https://img.shields.io/badge/NIST%20AI%20RMF-70%25%20Compatible-green.svg)](docs/compliance/NIST_AI_RMF_COMPATIBILITY.md)
+[![ISO 42001](https://img.shields.io/badge/ISO%2042001-Compliant-green.svg)](docs/compliance/ISO_42001_MAPPING.md)
+[![EU AI Act](https://img.shields.io/badge/EU%20AI%20Act-Ready-green.svg)](docs/compliance/EU_AI_ACT_COMPLIANCE.md)
+[![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://hub.docker.com/r/buildtovalue/btv-framework)
+
+"The first open-source AI governance middleware with integrated ISO 42001, EU AI Act, and NIST AI RMF compliance."
+
 
 **Runtime Governance for Autonomous AI Systems**
 
@@ -433,6 +437,13 @@ Built with inspiration from:
 ⭐ **Star this repo** if BuildToValue helps you build safer AI systems!
 
 ---
+📚 Academic Citation
+If you use BuildToValue in your research or product, please cite:
+
+BuildToValue Core Team. (2025). BuildToValue: A Middleware Framework for Real-Time AI Governance and Compliance (v0.9.0). Zenodo. https://doi.org/10.5281/zenodo.18080215
+
+Or use the CITATION.cff file included in the repository.
+
 
 **Last Updated**: December 28, 2025  
 **Status**: Production-Ready (v0.9.0 Golden Candidate)
