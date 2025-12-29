@@ -26,7 +26,7 @@ We actively maintain security updates for the following versions:
 
 **Secure Reporting Channel:**
 - **Email:** [security@buildtovalue.com](mailto:security@buildtovalue.com)
-- **PGP Key:** [Download from keybase.io/buildtovalue](https://keybase.io/buildtovalue)
+- **PGP Key:** [Download from keybase.io/buildtovalue]()
 - **Expected Response Time:** 48 hours (business days)
 - **Disclosure Timeline:** 90 days coordinated disclosure
 
@@ -219,7 +219,7 @@ add_header X-Content-Type-Options "nosniff";
 add_header X-XSS-Protection "1; mode=block";
 add_header Strict-Transport-Security "max-age=31536000";
 
-proxy_pass http://btv-gateway:8000;
+proxy_pass btv-gateway:8000;
 }
 ```
 ### 5. Database Security
